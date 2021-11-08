@@ -1,21 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView, RefreshControl, AsyncStorage, Image } from 'react-native';
-import { Container, Text, Header, Title, Left, Body, Button, ListItem, CheckBox, Item, Textarea, Spinner } from 'native-base';
+import { Container, Text, Header, Title, Left, Body, Right, Button, ListItem, CheckBox, Item, Textarea, Spinner } from 'native-base';
 import ImgToBase64 from 'react-native-image-base64';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Entypo from 'react-native-vector-icons/Entypo';
+import NetInfo from '@react-native-community/netinfo';
 import Geolocation from 'react-native-geolocation-service';
 import ImagePicker from 'react-native-image-crop-picker';
 import Modal from 'react-native-modal'
 import { useNavigation } from '@react-navigation/native';
 import { apiTransaksiAbsen, apiToken } from '../../API';
+import { openDatabase } from 'react-native-sqlite-storage';
+var db = openDatabase({ name: 'SatpamDatabase.db' });
 
 const AbsenSatpam = ({ route }) => {
     const navigation = useNavigation();
-    const { sub_task, id_lokasi } = route.params;
+    const { sub_task, id_lokasi, id_task } = route.params;
 
     const [isLoading, setisLoading] = useState(false);
+    const [netInfo, setnetInfo] = useState(false);
+    const [listLocal, setlistLocal] = useState([]);
+    const [dataLok, setdataLok] = useState([]);
     const [number, setnumber] = useState(-1);
     const [task, settask] = useState([]);
     const [note, setnote] = useState('');
@@ -24,19 +30,6 @@ const AbsenSatpam = ({ route }) => {
     const [check, setcheck] = useState(false);
     const [message, setmessage] = useState('');
     const [messageSuccess, setmessageSuccess] = useState('');
-
-    const add = () => {
-        for (let index = 0; index < sub_task.length; index++) {
-            const data = {
-                "sub_task_id": index + 1,
-                "photo": "",
-                "checklist": "",
-                "note": "-"
-            }
-            settask((rev) => [...rev, data])
-
-        }
-    }
 
     const openKamera = () => {
         ImagePicker.openCamera({
@@ -50,6 +43,78 @@ const AbsenSatpam = ({ route }) => {
                 .then(base64String => setphoto(`data:image/png;base64,${base64String}`))
                 .catch(err => console.log('Error Base 64 : ', err));
         });
+    }
+    const getDataSubTaskLokal = () => {
+        setisLoading(true)
+        db.transaction((tx) => {
+            tx.executeSql('SELECT * FROM table_sub_task WHERE id_task=?', [id_task], (tx, results) => {
+                var temp = [];
+                // console.log('ress ',results.rowsAffected);
+                for (let i = 0; i < results.rows.length; ++i)
+                    temp.push(results.rows.item(i));
+                console.log('Dari Lokal', temp);
+                setisLoading(false)
+                setlistLocal(temp)
+            });
+        });
+    }
+
+
+    const add = () => {
+        NetInfo.addEventListener((state) => {
+            if (state.isConnected) {
+                // for (let index = 0; index < sub_task.length; index++) {
+                //     const data = {
+                //         "sub_task_id": index + 1,
+                //         "photo": "",
+                //         "checklist": "",
+                //         "note": "-"
+                //     }
+                //     settask((rev) => [...rev, data])
+
+                // }
+            } else {
+                for (let index = 0; index < listLocal.length; index++) {
+                    const data = {
+                        "sub_task_id": index + 1,
+                        "photo": "",
+                        "checklist": "",
+                        "note": "-"
+                    }
+                    settask((rev) => [...rev, data])
+
+                }
+
+            }
+        })
+    }
+
+
+    var parse;
+    const getDataLocal = async () => {
+        const datalocal = await AsyncStorage.getItem('datalocal');
+        parse = JSON.parse(datalocal);
+        var parser = parse;
+        console.log('Parser: ',parser);
+        // AsyncStorage.removeItem('datalocal');
+        if (datalocal == null) {
+            // console.log(parser);
+        } else {
+            // console.log(parser);
+            parser.map((e) => {
+                // console.log('E: ',e);
+                const isi = {
+                    'barcode':e.barcode,
+                    'id_lokasi':e.id_lokasi,
+                    'id_sync':e.id_sync,
+                    'lati':e.lati,
+                    'longi':e.longi,
+                    'tgl_absen':e.tgl_absen,
+                    'tasks':e.tasks
+                }
+                setdataLok((rev) => [...rev,isi])
+            })
+        }
     }
 
     const postTransaksi = async () => {
@@ -67,8 +132,45 @@ const AbsenSatpam = ({ route }) => {
         }
         setisLoading(true);
         Geolocation.getCurrentPosition(async (position) => {
-            const data = {
-                "data": [{
+            NetInfo.addEventListener(async (state) => {
+                if(state.isConnected){
+                const data = {
+                    "data": [{
+                        "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
+                        "barcode": barcode,
+                        "id_lokasi": id_lokasi,
+                        "lati": position.coords.latitude,
+                        "longi": position.coords.longitude,
+                        "id_sync": null,
+                        'tasks': task
+                    }]
+                }
+                try {
+                    const response = await fetch(apiTransaksiAbsen(), {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': apiToken()
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    const json = await response.json();
+                    console.log(json);
+                    if (json.errors) {
+                        setmessage(json.message);
+                        setisLoading(false)
+                    } else {
+                        setmessageSuccess(json.message);
+                        setisLoading(false)
+
+                    }
+                } catch (error) {
+                    console.log('Error : ', error);
+                }
+                } else {         
+                const data =
+                {
                     "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
                     "barcode": barcode,
                     "id_lokasi": id_lokasi,
@@ -76,39 +178,20 @@ const AbsenSatpam = ({ route }) => {
                     "longi": position.coords.longitude,
                     "id_sync": null,
                     'tasks': task
-                }]
-            }
-            console.log(data);
-            AsyncStorage.setItem('datalocal', JSON.stringify(data))
-                .then((res) => {
-                    console.log('Res', res);
-                    setisLoading(false)
-                    setmessageSuccess('Berhasil Simpan Data Lokal')
-                })
-                .catch((err) => console.log(err))
-            // try {
-            //     const response = await fetch(apiTransaksiAbsen(), {
-            //         method: 'POST',
-            //         headers: {
-            //             'Accept': 'application/json',
-            //             'Content-Type': 'application/json',
-            //             'Authorization': apiToken()
-            //         },
-            //         body: JSON.stringify(data)
-            //     });
-            //     const json = await response.json();
-            //     console.log(json);
-            //     if (json.errors) {
-            //         setmessage(json.message);
-            //         setisLoading(false)
-            //     } else {
-            //         setmessageSuccess(json.message);
-            //         setisLoading(false)
+                }
+                // dataLok.push(data)
+                setdataLok((rev) => [...rev,data])
+                console.log(dataLok);
+                AsyncStorage.setItem('datalocal', JSON.stringify(dataLok))
+                    .then((res) => {
+                        console.log('Res', res);
+                        setisLoading(false)
+                        setmessageSuccess('Berhasil Simpan Data Lokal')
+                    })
+                    .catch((err) => console.log(err))
+                }
+            })
 
-            //     }
-            // } catch (error) {
-            //     console.log('Error : ', error);
-            // }
             /////
         }, error => {
             console.log('Error Get Lokasi: ', error);
@@ -122,13 +205,18 @@ const AbsenSatpam = ({ route }) => {
 
     useEffect(() => {
         // console.log(sub_task);
+        NetInfo.addEventListener((state) => {
+            setnetInfo(state.isConnected)
+        })
+        getDataSubTaskLokal()
         add()
-    }, []);
+        getDataLocal()
+    }, [NetInfo]);
 
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
-                <Left style={{ flexGrow: 1 }} >
+                <Left style={{ flex: 1 }} >
                     <TouchableOpacity onPress={() => navigation.goBack()} >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <MaterialIcons
@@ -140,46 +228,89 @@ const AbsenSatpam = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flexGrow: 1.2 }} >
+                <Body style={{ flex: 1.2 }} >
                     <Title>Task</Title>
                 </Body>
+                <Right style={{ flex: 1 }} >
+                    <View style={styles.signal(netInfo)} />
+                </Right>
             </Header>
             <View style={{ flex: 1 }} >
                 <ScrollView>
                     {
-                        sub_task.map((item, index) => {
-                            return <View key={index} style={styles.card} >
-                                <View style={{ margin: 8 }} >
-                                    <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.sub_task}</Text>
+                        netInfo == false ?
+                            // <View />
+                            sub_task == null ?
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                                    <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Kosong</Text>
                                 </View>
-                                <View style={styles.isActive(item.is_aktif)} >
-                                    {
-                                        item.is_aktif == 1 ?
-                                            <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-                                                <FontAwesome
-                                                    name='check-circle'
-                                                    size={30}
-                                                    color='white'
-                                                    style={{ marginRight: 8 }} />
-                                                <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >Active</Text>
-                                            </View>
-                                            : <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-                                                <FontAwesome
-                                                    name='close'
-                                                    size={30}
-                                                    color='white'
-                                                    style={{ marginRight: 8 }} />
-                                                <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >In Active</Text>
-                                            </View>
-                                    }
+                                :
+                                sub_task.map((item, index) => {
+                                    return <View key={index} style={styles.card} >
+                                        <View style={{ margin: 8 }} >
+                                            <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.sub_task}</Text>
+                                        </View>
+                                        <View style={styles.isActive(item.is_aktif)} >
+                                            {
+                                                item.is_aktif == 1 ?
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                        <FontAwesome
+                                                            name='check-circle'
+                                                            size={30}
+                                                            color='white'
+                                                            style={{ marginRight: 8 }} />
+                                                        <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >Active</Text>
+                                                    </View>
+                                                    : <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                        <FontAwesome
+                                                            name='close'
+                                                            size={30}
+                                                            color='white'
+                                                            style={{ marginRight: 8 }} />
+                                                        <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >In Active</Text>
+                                                    </View>
+                                            }
+                                        </View>
+                                        <View style={{ margin: 8 }} >
+                                            <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                                <Text style={styles.btnFont} >Isi Task</Text>
+                                            </Button>
+                                        </View>
+                                    </View>
+                                })
+                            : listLocal.map((item, index) => {
+                                return <View key={index} style={styles.card} >
+                                    <View style={{ margin: 8 }} >
+                                        <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.sub_task}</Text>
+                                    </View>
+                                    <View style={styles.isActive(item.is_aktif)} >
+                                        {
+                                            item.is_aktif == 1 ?
+                                                <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                    <FontAwesome
+                                                        name='check-circle'
+                                                        size={30}
+                                                        color='white'
+                                                        style={{ marginRight: 8 }} />
+                                                    <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >Active</Text>
+                                                </View>
+                                                : <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                    <FontAwesome
+                                                        name='close'
+                                                        size={30}
+                                                        color='white'
+                                                        style={{ marginRight: 8 }} />
+                                                    <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >In Active</Text>
+                                                </View>
+                                        }
+                                    </View>
+                                    <View style={{ margin: 8 }} >
+                                        <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                            <Text style={styles.btnFont} >Isi Task</Text>
+                                        </Button>
+                                    </View>
                                 </View>
-                                <View style={{ margin: 8 }} >
-                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
-                                        <Text style={styles.btnFont} >Isi Task</Text>
-                                    </Button>
-                                </View>
-                            </View>
-                        })
+                            })
                     }
                 </ScrollView>
                 <View style={{ margin: 8 }} >
@@ -309,6 +440,14 @@ const AbsenSatpam = ({ route }) => {
 export default AbsenSatpam
 
 const styles = StyleSheet.create({
+    signal: (sinyal) => ({
+        backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
+        width: 25,
+        elevation: 6,
+        height: 25,
+        borderRadius: 4,
+        marginRight: 20
+    }),
     card: {
         margin: 8,
         padding: 8,

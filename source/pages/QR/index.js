@@ -1,26 +1,31 @@
 'use strict';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView, AsyncStorage } from 'react-native';
-import { Container, Text, Header, Title, Left, Body, Button, Spinner } from 'native-base';
+import { Container, Text, Header, Title, Left, Right, Body, Button, Spinner } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import base64 from 'react-native-base64';
 import Geolocation from 'react-native-geolocation-service';
 import { getPreciseDistance, getDistance } from 'geolib'
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import NetInfo from '@react-native-community/netinfo'
 import Modal from 'react-native-modal'
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { useNavigation } from '@react-navigation/native';
 import { apiTaskSubTaskByLokasi, apiToken } from '../../API';
+import { openDatabase } from 'react-native-sqlite-storage';
+var db = openDatabase({ name: 'SatpamDatabase.db' });
 
 const ScanQR = () => {
   const navigation = useNavigation();
   // MTstNy4wNDc0OTc7MTA3Ljc0NTkzMw=='
+  const [netInfo, setnetInfo] = useState(false);
   const [list, setlist] = useState([]);
+  const [listLocal, setlistLocal] = useState([]);
   const [nama, setnama] = useState('');
   const [barcode, setbarcode] = useState('');
   const [message, setmessage] = useState('');
-  const [scan, setscan] = useState(true);
-  const [submit, setsubmit] = useState(false);
+  const [scan, setscan] = useState(false);
+  const [submit, setsubmit] = useState(true);
   const [isLoading, setisLoading] = useState(false);
   const [latitudeQR, setlatitudeQR] = useState(0);
   const [longitudeQR, setlongitudeQR] = useState(0);
@@ -96,36 +101,57 @@ const ScanQR = () => {
 
   const getData = async (id_lokasi) => {
     setisLoading(true);
-    try {
-      const response = await fetch(apiTaskSubTaskByLokasi(id_lokasi), {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': apiToken()
-        }
+    NetInfo.addEventListener(async (state) => {
+      // if (state.isConnected) {
+      //   try {
+      //     const response = await fetch(apiTaskSubTaskByLokasi(id_lokasi), {
+      //       method: 'GET',
+      //       headers: {
+      //         'Accept': 'application/json',
+      //         'Authorization': apiToken()
+      //       }
+      //     });
+      //     const json = await response.json();
+      //     console.log(json);
+      //     if (json.errors) {
+      //       setmessage(json.errors.id_lokasi)
+      //     } else {
+      //       setisLoading(false);
+      //       setlist(json)
+      //     }
+      //   } catch (error) {
+      //     console.log('Error : ', error);
+      //   }
+      // } else {
+      db.transaction((tx) => {
+        // tx.executeSql('SELECT * FROM table_task', [], (tx, results) => {
+        tx.executeSql('SELECT * FROM table_task WHERE id_lokasi=?', [1], (tx, results) => {
+          var temp = [];
+          for (let i = 0; i < results.rows.length; ++i)
+            temp.push(results.rows.item(i));
+          console.log('Dari Lokal', temp);
+          setisLoading(false)
+          setlistLocal(temp)
+        });
       });
-      const json = await response.json();
-      console.log(json);
-      if (json.errors) {
-        setmessage(json.errors.id_lokasi)
-      } else {
-        setisLoading(false);
-        setlist(json)
-      }
-    } catch (error) {
-      console.log('Error : ', error);
-    }
+      // }
+    })
+
   }
 
   useEffect(() => {
     getLokasi();
-    // getData()
-    setscan(true);
-  }, []);
+    getData();
+    getNama()
+    // setscan(true);
+    NetInfo.addEventListener((state) => {
+      setnetInfo(state.isConnected)
+    })
+  }, [NetInfo]);
   return (
     <Container>
       <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
-        <Left style={{ flexGrow: 1 }} >
+        <Left style={{ flex: 1 }} >
           <TouchableOpacity onPress={() => navigation.goBack()} >
             <View style={{ flexDirection: 'row', alignItems: 'center' }} >
               <MaterialIcons
@@ -137,9 +163,12 @@ const ScanQR = () => {
             </View>
           </TouchableOpacity>
         </Left>
-        <Body style={{ flexGrow: 1.5 }} >
+        <Body style={{ flex: 0.9 }} >
           <Title>Scan Qr</Title>
         </Body>
+        <Right style={{ flex: 0.5 }} >
+          <View style={styles.signal(netInfo)} />
+        </Right>
       </Header>
       <View style={{ flex: 1, backgroundColor: '#eeeeee' }} >
         <ScrollView
@@ -205,23 +234,43 @@ const ScanQR = () => {
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                   <Spinner color='#252A34' />
                 </View>
-                : list.length == 0 ?
-                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-                    <Text style={{ color: '#bdbdbd', fontSize: 17, }} >Task Kosong</Text>
-                  </View>
-                  : list.map((item, index) => {
-                    return <View key={index} style={styles.card} >
-                      <Text style={{ fontSize: 17, color: 'black' }} >{item.task}</Text>
-                      <View>
-                        <Button full style={styles.btnSubTas} onPress={() => navigation.navigate('AbsenSatpam', {
-                          sub_task: item.sub_task,
-                          id_lokasi:item.id_lokasi
-                        })} >
-                          <Text style={styles.btnFont} >Lihat Task</Text>
-                        </Button>
-                      </View>
+                : netInfo == false ?
+                  list.length == 0 ?
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                      <Text style={{ color: '#bdbdbd', fontSize: 17, }} >Task Kosong</Text>
                     </View>
-                  })
+                    : list.map((item, index) => {
+                      return <View key={index} style={styles.card} >
+                        <Text style={{ fontSize: 17, color: 'black' }} >{item.task}</Text>
+                        <View>
+                          <Button full style={styles.btnSubTas} onPress={() => navigation.navigate('AbsenSatpam', {
+                            sub_task: item.sub_task,
+                            id_lokasi: item.id_lokasi
+                          })} >
+                            <Text style={styles.btnFont} >Lihat Task</Text>
+                          </Button>
+                        </View>
+                      </View>
+                    })
+                  :
+                  listLocal.length == 0 ?
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                      <Text style={{ color: '#bdbdbd', fontSize: 17, }} >Task Kosong</Text>
+                    </View>
+                    : listLocal.map((item, index) => {
+                      return <View key={index} style={styles.card} >
+                        <Text style={{ fontSize: 17, color: 'black' }} >{item.task}</Text>
+                        <View>
+                          <Button full style={styles.btnSubTas} onPress={() => navigation.navigate('AbsenSatpam', {
+                            // sub_task: item.sub_task,
+                            id_task: item.id_task,
+                            id_lokasi: item.id_lokasi
+                          })} >
+                            <Text style={styles.btnFont} >Lihat Task</Text>
+                          </Button>
+                        </View>
+                      </View>
+                    })
               : <View />
           }
         </ScrollView>
@@ -233,6 +282,14 @@ const ScanQR = () => {
 export default ScanQR
 
 const styles = StyleSheet.create({
+  signal: (sinyal) => ({
+    backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
+    width: 25,
+    elevation: 6,
+    height: 25,
+    borderRadius: 4,
+    marginRight: 20
+  }),
   divider: {
     backgroundColor: '#bdbdbd',
     height: 3,

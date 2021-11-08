@@ -23,8 +23,8 @@ const apiPostHistoryLokasiSecurity = () => {
     return url;
 }
 const apiDataCheckPoint = (barcode) => {
-    const url = `http://192.168.50.95/simr/public/api/v1/mobile-app/secsms/checkpoint?user_creator=${barcode}`;
-    // const url = `https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/checkpoint?user_creator=${barcode}`;
+    // const url = `http://192.168.50.95/simr/public/api/v1/mobile-app/secsms/checkpoint?user_creator=${barcode}`;
+    const url = `https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/checkpoint?user_creator=${barcode}`;
     return url;
 }
 const apiSimpanCheckPoint = () => {

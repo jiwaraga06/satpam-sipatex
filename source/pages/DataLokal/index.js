@@ -19,7 +19,7 @@ const Datalokal = () => {
     const getDataLocal = async () => {
         const datalocal = await AsyncStorage.getItem('datalocal');
         parse = JSON.parse(datalocal);
-        var parser = parse.data;
+        var parser = parse;
         console.log(parse);
         // AsyncStorage.removeItem('datalocal');
         if (datalocal == null) {
@@ -33,6 +33,9 @@ const Datalokal = () => {
     const uploadServer = async () => {
         const datalocal = await AsyncStorage.getItem('datalocal');
         parse = JSON.parse(datalocal);
+        const data = {
+            'data' :parse
+        }
         setisLoading(true)
         try {
             const response = await fetch(apiTransaksiAbsen(), {
@@ -42,7 +45,7 @@ const Datalokal = () => {
                     'Content-Type': 'application/json',
                     'Authorization': apiToken()
                 },
-                body: JSON.stringify(parse)
+                body: JSON.stringify(data)
             });
             const json = await response.json();
             console.log(json);
@@ -87,11 +90,12 @@ const Datalokal = () => {
                 <ScrollView
                     contentContainerStyle={{ flexGrow: 1 }}>
                     {
-                        list.length == 0 ?
-                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-                                <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Lokal Kosong</Text>
-                            </View>
-                            : list.map((item, index) => {
+                        // list.length == 0 ?
+                        //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                        //         <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Lokal Kosong</Text>
+                        //     </View>
+                            // : 
+                            list.map((item, index) => {
                                 return <View key={index} >
                                     <View style={styles.card} >
                                         <View style={{ margin: 8 }} >

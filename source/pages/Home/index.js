@@ -212,7 +212,7 @@ const Home = () => {
         var parser = parse.data;
         // AsyncStorage.removeItem('datalocal');
         if (datalocal == null) {
-            console.log(dataLocal.length);
+            console.log(dataLocal);
         } else {
             setdataLocal(parser)
             // console.log(dataLocal.length);
@@ -396,41 +396,25 @@ const Home = () => {
                         <View style={styles.viewInfo} >
                             {
                                 <View>
-                                    {
-                                        dataLocal.length > 0 ?
-                                            <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Absen Local {JSON.stringify(dataLocal.length)} Data</Text>
-                                            : <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data di Local Kosong</Text>
-                                    }
+                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
                                     <Button full style={{ backgroundColor: '#ff9800', borderRadius: 6, height: 33, margin: 8 }}
                                         onPress={() => {
-                                            navigation.navigate('LocalCheckpoint')
+                                            navigation.navigate('Datalokal')
                                         }}>
                                         <Text>Data lokal</Text>
                                     </Button>
                                 </View>
                             }
-                            {
-                                dataLocal.length > 0 ?
-                                    <MaterialCommunityIcons
-                                        name='database-plus'
-                                        color='white'
-                                        size={50}
-                                    />
-                                    : <MaterialCommunityIcons
-                                        name='database-remove'
-                                        color='white'
-                                        size={50}
-                                    />
-                            }
+                            <MaterialCommunityIcons
+                                name='database'
+                                color='white'
+                                size={50}
+                            />
                         </View>
                         <View style={styles.viewCheckpoint} >
                             {
                                 <View>
-                                    {
-                                        dataLocal.length > 0 ?
-                                            <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Chechpoint Local</Text>
-                                            : <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data di Local Kosong</Text>
-                                    }
+                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
                                     <Button full style={{ backgroundColor: '#1e88e5', borderRadius: 6, height: 33, margin: 8 }}
                                         onPress={() => {
                                             navigation.navigate('LocalCheckpoint')
@@ -439,19 +423,11 @@ const Home = () => {
                                     </Button>
                                 </View>
                             }
-                            {
-                                dataLocal.length > 0 ?
-                                    <MaterialCommunityIcons
-                                        name='database-plus'
-                                        color='white'
-                                        size={50}
-                                    />
-                                    : <MaterialCommunityIcons
-                                        name='database-remove'
-                                        color='white'
-                                        size={50}
-                                    />
-                            }
+                            <MaterialCommunityIcons
+                                name='database'
+                                color='white'
+                                size={50}
+                            />
                         </View>
                     </View>
                     <View style={{ margin: 8 }} >
@@ -532,7 +508,6 @@ const Home = () => {
                                     </View>
                     }
 
-                    <TouchableOpacity >
                         <View style={{ margin: 8 }} >
                             <View style={styles.logout} >
                                 <View>
@@ -549,7 +524,6 @@ const Home = () => {
                                 />
                             </View>
                         </View>
-                    </TouchableOpacity>
                 </ScrollView>
             </View>
             {/* LOADING */}
