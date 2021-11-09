@@ -35,13 +35,11 @@ const TabTask = () => {
 
     const onRefresh = React.useCallback(async () => {
         setisLoading(true);
-        NetInfo.addEventListener((state) => {
-            setnetInfo(state.isConnected)
-            getLokalCheckpoint()
-        })
+        getLokalCheckpoint()
+        
     }, [isLoading]);
 
-    const postTambahCheckpointTask = async (id_lokasi, task, barcode) => {
+    const postTambahCheckpointTask = async (id_lokasi, task, barcode, id) => {
         const data = {
             'id_lokasi': id_lokasi,
             'task': task,
@@ -79,7 +77,10 @@ const TabTask = () => {
 
     useEffect(() => {
         getLokalCheckpoint()
-    }, [NetInfo]);
+        NetInfo.addEventListener((state) => {
+            setnetInfo(state.isConnected)
+        })
+    }, []);
 
     return (
         <View style={{ flex: 1 }} >
@@ -104,7 +105,7 @@ const TabTask = () => {
                                     <Text style={{ fontSize: 15, color: 'black', fontWeight: '700', marginTop: 4, marginBottom: 8 }} >{item.task}</Text>
                                     <View style={{ margin: 8 }} >
                                         <Button full style={styles.btnUpload} onPress={() => {
-                                            postTambahCheckpointTask()
+                                            postTambahCheckpointTask(item.id_lokasi, item.task, item.user_creator, item.id)
                                         }} >
                                             <Text style={styles.btnFont} >Upload ke Server</Text>
                                         </Button>
@@ -149,7 +150,10 @@ const TabTask = () => {
                         />
                         <Text style={{ color: "black", fontSize: 17 }} >{messagesuccess}</Text>
                     </View>
-                    <Button full style={styles.btnClose} onPress={() => { setmessagesuccess(''); navigation.goBack() }} >
+                    <Button full style={styles.btnClose} onPress={() => {
+                        setmessagesuccess('')
+                        getLokalCheckpoint()
+                    }} >
                         <Text style={styles.btnFont} >Tutup</Text>
                     </Button>
                 </View>

@@ -13,6 +13,8 @@ import { updateValueTableSubTask } from '../../../SQLITE';
 const EditCheckPointSubTask = ({ route }) => {
     const navigation = useNavigation();
     const { id, id_task, sub_task, ket, is_aktif } = route.params;
+
+    const [netInfo, setnetInfo] = useState(false);
     const [subTask, setsubTask] = useState('');
     const [keterangan, setketerangan] = useState('');
     const [isAktif, setisAktif] = useState(-1);
@@ -35,17 +37,18 @@ const EditCheckPointSubTask = ({ route }) => {
         }
         var date = `${tahun}-${bulan}-${days}`;
         const data = {
+            "id": id,
             "id_task": id_task,
             "sub_task": subTask,
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
+        // NetInfo.addEventListener(async (state) => {
+            if (netInfo == true) {
                 setisLoading(true);
                 try {
                     const response = await fetch(apiUpdateSubTask(), {
-                        method: 'POST',
+                        method: 'Put',
                         headers: {
                             'Accept': 'application/json',
                             'Content-Type': 'application/json',
@@ -71,19 +74,22 @@ const EditCheckPointSubTask = ({ route }) => {
                     Alert.alert('information', error)
                 }
             } else {
-            if (!subTask && !keterangan) {
-                seterrKet('Keterangan Harus di isi');
-                setsubTask('Sub task harus di isi');
-                return true;
+                if (!subTask && !keterangan) {
+                    seterrKet('Keterangan Harus di isi');
+                    setsubTask('Sub task harus di isi');
+                    return true;
+                }
+                updateValueTableSubTask(id_task, subTask, keterangan, isAktif, date, id)
             }
-            updateValueTableSubTask(id_task, subTask, keterangan, isAktif, date, id)
-            }
-        })
+        // })
     }
     useEffect(() => {
         setsubTask(sub_task);
         setisAktif(is_aktif);
         setketerangan(ket)
+        NetInfo.addEventListener((state) => {
+            setnetInfo(state.isConnected)
+        })
     }, []);
     return (
         <Container>

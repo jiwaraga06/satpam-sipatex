@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl,Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, Alert } from 'react-native';
 import { Container, Button, Text, Spinner } from 'native-base';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -36,13 +36,11 @@ const TabSubTask = () => {
 
     const onRefresh = React.useCallback(async () => {
         setisLoading(true);
-        NetInfo.addEventListener((state) => {
-            setnetInfo(state.isConnected)
-            getLokalCheckpoint()
-        })
+        getLokalCheckpoint()
+
     }, [isLoading]);
 
-    const postTambahCheckpointSubTask = async (id_task, sub_task, keterangan, is_aktif) => {
+    const postTambahCheckpointSubTask = async (id_task, sub_task, keterangan, is_aktif, id) => {
         const data = {
             "id_task": id_task,
             "sub_task": sub_task,
@@ -80,7 +78,10 @@ const TabSubTask = () => {
 
     useEffect(() => {
         getLokalCheckpoint()
-    }, [NetInfo]);
+        NetInfo.addEventListener((state) => {
+            setnetInfo(state.isConnected)
+        })
+    }, []);
 
     return (
         <View style={{ flex: 1 }} >
@@ -103,18 +104,32 @@ const TabSubTask = () => {
                                     <Text style={{ fontSize: 17, color: 'black' }} >Keterangan</Text>
                                     <Text style={{ fontSize: 15, color: 'black', fontWeight: '700', marginTop: 4 }} >{item.keterangan}</Text>
                                     <View style={styles.isAktif(item.is_aktif)} >
-                                        <FontAwesome
-                                            name='check-circle'
-                                            color='white'
-                                            size={30}
-                                            style={{ marginRight: 8 }}
-                                        />
-                                        <Text style={{ fontSize: 16, color: 'white', fontWeight: '700' }} >Active</Text>
+                                        {
+                                            item.is_aktif == 1 ?
+                                                <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                    <FontAwesome
+                                                        name='check-circle'
+                                                        color='white'
+                                                        size={30}
+                                                        style={{ marginRight: 8 }}
+                                                    />
+                                                    <Text style={{ fontSize: 16, color: 'white', fontWeight: '700' }} >Active</Text>
+                                                </View>
+                                                : <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                    <FontAwesome
+                                                        name='close'
+                                                        color='white'
+                                                        size={30}
+                                                        style={{ marginRight: 8 }}
+                                                    />
+                                                    <Text style={{ fontSize: 16, color: 'white', fontWeight: '700' }} >In-Active</Text>
+                                                </View>
+                                        }
                                     </View>
                                     <View style={{ margin: 8 }} >
                                         <Button full style={styles.btnUpload} onPress={() => {
-                                        postTambahCheckpointSubTask()
-                                    }} >
+                                            postTambahCheckpointSubTask(item.id_task, item.sub_task, item.keterangan, item.is_aktif, item.id)
+                                        }} >
                                             <Text style={styles.btnFont} >Upload ke Server</Text>
                                         </Button>
                                     </View>
@@ -158,7 +173,10 @@ const TabSubTask = () => {
                         />
                         <Text style={{ color: "black", fontSize: 17 }} >{messagesuccess}</Text>
                     </View>
-                    <Button full style={styles.btnClose} onPress={() => { setmessagesuccess(''); navigation.goBack() }} >
+                    <Button full style={styles.btnClose} onPress={() => {
+                        setmessagesuccess('');
+                        getLokalCheckpoint()
+                    }} >
                         <Text style={styles.btnFont} >Tutup</Text>
                     </Button>
                 </View>

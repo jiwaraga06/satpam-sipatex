@@ -44,11 +44,11 @@ const CheckPointTask = ({ route }) => {
             setnetInfo(state.isConnected)
         })
         getDataTaskLokal()
-    }, [NetInfo]);
+    }, []);
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
-                <Left style={{ Flex: 1 }} >
+                <Left style={{ flex: 1 }} >
                     <TouchableOpacity onPress={() => navigation.goBack()} >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <MaterialIcons
@@ -60,7 +60,7 @@ const CheckPointTask = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flex: 0.7 }} >
+                <Body style={{ flex: 1.8 }} >
                     <Title>Task CheckPoint</Title>
                 </Body>
                 <Right style={{ flex: 0.1 }} >

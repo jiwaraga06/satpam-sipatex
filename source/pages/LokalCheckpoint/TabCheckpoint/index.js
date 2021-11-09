@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, RefreshControl,Alert } from 'react-native';
+import { StyleSheet, View, ScrollView, RefreshControl, Alert } from 'react-native';
 import { Container, Button, Text, Spinner } from 'native-base';
 import { openDatabase } from 'react-native-sqlite-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -34,10 +34,8 @@ const TabCheckpoint = () => {
 
     const onRefresh = React.useCallback(async () => {
         setisLoading(true);
-        NetInfo.addEventListener((state) => {
-            setnetInfo(state.isConnected)
-            getLokalCheckpoint()
-        })
+        getLokalCheckpoint()
+        
     }, [isLoading]);
 
     const postTambahCheckpoint = async (nama_lokasi, latitude, longitude, keterangan, barcode, id) => {
@@ -60,7 +58,7 @@ const TabCheckpoint = () => {
                 body: JSON.stringify(data)
             });
             const json = await response.json();
-            // console.log(json);
+            console.log(json);
             if (json.errors) {
                 setloadingUpload(false);
                 setmessage(json.message);
@@ -80,7 +78,10 @@ const TabCheckpoint = () => {
 
     useEffect(() => {
         getLokalCheckpoint()
-    }, [NetInfo]);
+        NetInfo.addEventListener((state) => {
+            setnetInfo(state.isConnected)
+        })
+    }, []);
 
     return (
         <View style={{ flex: 1 }} >
@@ -107,7 +108,8 @@ const TabCheckpoint = () => {
                                     <Text style={{ fontSize: 15, color: 'black', fontWeight: '700', marginTop: 4 }} >{item.keterangan}</Text>
                                     <View style={{ margin: 8 }} >
                                         <Button full style={styles.btnUpload} onPress={() => {
-                                            postTambahCheckpoint()
+                                            postTambahCheckpoint(item.nama_lokasi, item.lati, item.longi, item.keterangan, item.user_creator, item.id)
+                                            // postTambahCheckpoint(item.id)
                                         }} >
                                             <Text style={styles.btnFont} >Upload ke Server</Text>
                                         </Button>
@@ -152,7 +154,10 @@ const TabCheckpoint = () => {
                         />
                         <Text style={{ color: "black", fontSize: 17 }} >{messagesuccess}</Text>
                     </View>
-                    <Button full style={styles.btnClose} onPress={() => { setmessagesuccess(''); navigation.goBack() }} >
+                    <Button full style={styles.btnClose} onPress={() => {
+                        setmessagesuccess('')
+                        getLokalCheckpoint()
+                    }} >
                         <Text style={styles.btnFont} >Tutup</Text>
                     </Button>
                 </View>
@@ -181,7 +186,7 @@ const styles = StyleSheet.create({
         fontWeight: '700',
         color: 'white'
     },
-    
+
     btnClose: {
         backgroundColor: '#252A34',
         borderRadius: 6,

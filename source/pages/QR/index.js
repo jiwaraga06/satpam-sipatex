@@ -1,6 +1,6 @@
 'use strict';
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, AsyncStorage } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView, AsyncStorage, Alert } from 'react-native';
 import { Container, Text, Header, Title, Left, Right, Body, Button, Spinner } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import base64 from 'react-native-base64';
@@ -25,7 +25,7 @@ const ScanQR = () => {
   const [barcode, setbarcode] = useState('');
   const [message, setmessage] = useState('');
   const [scan, setscan] = useState(false);
-  const [submit, setsubmit] = useState(true);
+  const [submit, setsubmit] = useState(false);
   const [isLoading, setisLoading] = useState(false);
   const [latitudeQR, setlatitudeQR] = useState(0);
   const [longitudeQR, setlongitudeQR] = useState(0);
@@ -62,7 +62,7 @@ const ScanQR = () => {
   };
 
   const getLokasi = () => {
-    Geolocation.watchPosition((position) => {
+    Geolocation.getCurrentPosition((position) => {
       // console.log(position);
       setlatitude(position.coords.latitude);
       setlongitude(position.coords.longitude);
@@ -72,9 +72,7 @@ const ScanQR = () => {
       accuracy: 1,
       enableHighAccuracy: true,
       distanceFilter: 1,
-      interval: 1000,
-      fastestInterval: 500,
-      useSignificantChanges: true
+      maximumAge: 0
     })
   }
 
@@ -85,7 +83,7 @@ const ScanQR = () => {
       { latitude: latitude, longitude: longitude },
     );
     console.log('Jarak : ', distance);
-    if (distance <= 2) {
+    if (distance <= 10) {
       setTimeout(() => {
         setsubmit(true);
         setisLoading(false);
@@ -101,31 +99,33 @@ const ScanQR = () => {
 
   const getData = async (id_lokasi) => {
     setisLoading(true);
-    NetInfo.addEventListener(async (state) => {
-      // if (state.isConnected) {
-      //   try {
-      //     const response = await fetch(apiTaskSubTaskByLokasi(id_lokasi), {
-      //       method: 'GET',
-      //       headers: {
-      //         'Accept': 'application/json',
-      //         'Authorization': apiToken()
-      //       }
-      //     });
-      //     const json = await response.json();
-      //     console.log(json);
-      //     if (json.errors) {
-      //       setmessage(json.errors.id_lokasi)
-      //     } else {
-      //       setisLoading(false);
-      //       setlist(json)
-      //     }
-      //   } catch (error) {
-      //     console.log('Error : ', error);
-      //   }
-      // } else {
+    // NetInfo.addEventListener(async (state) => {
+    if (netInfo == true) {
+      try {
+        const response = await fetch(apiTaskSubTaskByLokasi(id_lokasi), {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': apiToken()
+          }
+        });
+        const json = await response.json();
+        console.log(json);
+        if (json.errors) {
+          setmessage(json.errors.id_lokasi)
+          setisLoading(false);
+          Alert.alert('Information', json.errors.id_lokasi)
+        } else {
+          setisLoading(false);
+          setlist(json)
+        }
+      } catch (error) {
+        console.log('Error : ', error);
+      }
+    } else {
       db.transaction((tx) => {
         // tx.executeSql('SELECT * FROM table_task', [], (tx, results) => {
-        tx.executeSql('SELECT * FROM table_task WHERE id_lokasi=?', [1], (tx, results) => {
+        tx.executeSql('SELECT * FROM table_task WHERE id_lokasi=?', [id_lokasi], (tx, results) => {
           var temp = [];
           for (let i = 0; i < results.rows.length; ++i)
             temp.push(results.rows.item(i));
@@ -134,20 +134,20 @@ const ScanQR = () => {
           setlistLocal(temp)
         });
       });
-      // }
-    })
+    }
+    // })
 
   }
 
   useEffect(() => {
     getLokasi();
-    getData();
+    // getData();
     getNama()
-    // setscan(true);
+    setscan(true);
     NetInfo.addEventListener((state) => {
       setnetInfo(state.isConnected)
     })
-  }, [NetInfo]);
+  }, []);
   return (
     <Container>
       <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
@@ -203,25 +203,28 @@ const ScanQR = () => {
                     <View style={{ height: 70, justifyContent: 'center', alignItems: 'center' }} >
                       {
                         data == false ?
+                          <View />
+                          : <View style={{ margin: 8 }} >
+                            <Text style={{ fontSize: 17, color: 'black' }} >Anda Jauh dari Radius</Text>
+                          </View>
+                      }
+                      {
+                        data == false ?
                           <Button full style={styles.btnSubmit} onPress={onSubmit} disabled={isLoading ? true : false} >
                             {
                               isLoading == true ?
-                                <Spinner color='#252A34' />
+                                <Spinner color='white' />
                                 : <Text style={styles.btnFont} >Submit</Text>
                             }
                           </Button>
                           :
-                          <View>
-                            <View style={{ margin: 8 }} >
-                              <Text style={{ fontSize: 17, color: 'black' }} >Anda Jauh dari Radius</Text>
-                            </View>
-                            <Button full style={styles.btnScanUlang} onPress={() => {
-                              setdata(false);
-                              setscan(true);
-                            }} >
-                              <Text style={styles.btnFont} >Scan Ulang</Text>
-                            </Button>
-                          </View>
+                          <Button full style={styles.btnScanUlang} onPress={() => {
+                            setdata(false);
+                            setscan(true);
+                            getLokasi()
+                          }} >
+                            <Text style={styles.btnFont} >Scan Ulang</Text>
+                          </Button>
                       }
                     </View>
                   </View>
@@ -234,7 +237,7 @@ const ScanQR = () => {
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                   <Spinner color='#252A34' />
                 </View>
-                : netInfo == false ?
+                : netInfo == true ?
                   list.length == 0 ?
                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                       <Text style={{ color: '#bdbdbd', fontSize: 17, }} >Task Kosong</Text>
@@ -262,7 +265,7 @@ const ScanQR = () => {
                         <Text style={{ fontSize: 17, color: 'black' }} >{item.task}</Text>
                         <View>
                           <Button full style={styles.btnSubTas} onPress={() => navigation.navigate('AbsenSatpam', {
-                            // sub_task: item.sub_task,
+                            sub_task: item.sub_task,
                             id_task: item.id_task,
                             id_lokasi: item.id_lokasi
                           })} >

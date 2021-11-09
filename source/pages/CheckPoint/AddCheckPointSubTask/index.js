@@ -8,7 +8,8 @@ import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import { apiBikinSubTask, apiBikinTask, apiToken } from '../../../API';
 import { insertValueTableSubTaskForm } from '../../../SQLITE';
-
+import { openDatabase } from 'react-native-sqlite-storage';
+var db = openDatabase({ name: 'SatpamDatabase.db' });
 
 const AddCheckPointSubTask = ({ route }) => {
     const navigation = useNavigation();
@@ -16,6 +17,7 @@ const AddCheckPointSubTask = ({ route }) => {
     const [subTask, setsubTask] = useState('');
     const [keterangan, setketerangan] = useState('');
     const [netinfo, setnetinfo] = useState(false)
+    const [listLocal, setlistLocal] = useState([]);
     const [isAktif, setisAktif] = useState(-1);
     const [isLoading, setisLoading] = useState(false);
     const [message, setmessage] = useState('');
@@ -23,6 +25,26 @@ const AddCheckPointSubTask = ({ route }) => {
     const [errsubTask, seterrsubTask] = useState('');
     const [errKet, seterrKet] = useState('');
     const [errisAktif, seterrisAktif] = useState('');
+
+    const getDataSubTaskLokal = () => {
+        db.transaction((tx) => {
+            tx.executeSql('SELECT * FROM table_sub_task', [], (tx, results) => {
+                var temp = [];
+                // console.log('ress ',results.rowsAffected);
+                for (let i = 0; i < results.rows.length; ++i)
+                    temp.push(results.rows.item(i));
+                // console.log('Dari Lokal', temp);
+                temp.map((e) => {
+                    const a = {
+                        'id_sub_task': e.id_sub_task
+                    }
+                    // console.log(a);
+                    setlistLocal(a)
+                    console.log(listLocal);
+                })
+            });
+        });
+    }
 
     const postTambahCheckpointSubTask = async () => {
         const tahun = new Date().getFullYear();
@@ -41,8 +63,8 @@ const AddCheckPointSubTask = ({ route }) => {
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
+        // NetInfo.addEventListener(async (state) => {
+            if (netinfo == true) {
 
                 setisLoading(true);
                 try {
@@ -73,21 +95,22 @@ const AddCheckPointSubTask = ({ route }) => {
                     Alert.alert('information', error)
                 }
             } else {
-            if (!subTask && !keterangan) {
-                seterrKet('Keterangan Harus di isi');
-                setsubTask('Sub task harus di isi');
-                return true;
+                if (!subTask && !keterangan) {
+                    seterrKet('Keterangan Harus di isi');
+                    setsubTask('Sub task harus di isi');
+                    return true;
+                }
+                insertValueTableSubTaskForm(id_task, listLocal.id_sub_task + 1, subTask, keterangan, date, date, isAktif)
             }
-            insertValueTableSubTaskForm(id_task, subTask, keterangan, date, date, isAktif)
-            }
-        })
+        // })
     }
     useEffect(() => {
         NetInfo.addEventListener((state) => {
             setnetinfo(state.isConnected)
         })
+        getDataSubTaskLokal()
         console.log('id task :', id_task);
-    }, [NetInfo]);
+    }, []);
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >

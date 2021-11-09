@@ -8,7 +8,8 @@ import Modal from 'react-native-modal';
 import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
 import { apiBikinTask, apiToken } from '../../../API';
 import { insertValueTableTaskForm } from '../../../SQLITE';
-
+import { openDatabase } from 'react-native-sqlite-storage';
+var db = openDatabase({ name: 'SatpamDatabase.db' });
 
 const AddCheckPointTask = ({ route }) => {
     const navigation = useNavigation();
@@ -16,10 +17,29 @@ const AddCheckPointTask = ({ route }) => {
 
     const [netInfo, setnetInfo] = useState(false);
     const [task, settask] = useState('');
+    const [listLocal, setlistLocal] = useState([]);
     const [isLoading, setisLoading] = useState(false);
     const [message, setmessage] = useState('');
     const [messagesuccess, setmessagesuccess] = useState('');
     const [errtask, seterrtask] = useState('');
+
+    const getDataTaskLokal = () => {
+        db.transaction((tx) => {
+            tx.executeSql('SELECT * FROM table_task', [], (tx, results) => {
+                var temp = [];
+                for (let i = 0; i < results.rows.length; ++i)
+                    temp.push(results.rows.item(i));
+                console.log('Dari Lokal', temp);
+                temp.map((e) => {
+                    const a = {
+                        'id_task': e.id_task
+                    }
+                    setlistLocal(a);
+                    console.log(listLocal);
+                })
+            });
+        });
+    }
 
     const postTambahCheckpointTask = async () => {
         const barcode = await AsyncStorage.getItem('barcode');
@@ -38,49 +58,50 @@ const AddCheckPointTask = ({ route }) => {
             'task': task,
             'user_creator': barcode
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
-                setisLoading(true);
-                try {
-                    const response = await fetch(apiBikinTask(), {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': apiToken()
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    const json = await response.json();
-                    console.log(json);
-                    if (json.errors) {
-                        setisLoading(false);
-                        setmessage(json.message);
-                        seterrtask(json.errors.task);
-                    } else {
-                        setisLoading(false);
-                        setmessagesuccess(json);
-                        // navigation.goBack();
-                    }
-                } catch (error) {
-                    console.log('Error Tambah Checkpoint : ', error);
-                    Alert.alert('information', error)
+        // NetInfo.addEventListener(async (state) => {
+        if (netInfo == true) {
+            setisLoading(true);
+            try {
+                const response = await fetch(apiBikinTask(), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                console.log(json);
+                if (json.errors) {
+                    setisLoading(false);
+                    setmessage(json.message);
+                    seterrtask(json.errors.task);
+                } else {
+                    setisLoading(false);
+                    setmessagesuccess(json);
+                    // navigation.goBack();
                 }
-            } else {
-                if (!task) {
-                    seterrtask('Task Harus di Isi')
-                    return true;
-                }
-                insertValueTableTaskForm(id_lokasi, task, barcode, date, date)
+            } catch (error) {
+                console.log('Error Tambah Checkpoint : ', error);
+                Alert.alert('information', error)
             }
-        })
+        } else {
+            if (!task) {
+                seterrtask('Task Harus di Isi')
+                return true;
+            }
+            insertValueTableTaskForm(id_lokasi, listLocal.id_task + 1, task, barcode, date, date)
+        }
+        // })
 
     }
     useEffect(() => {
+        getDataTaskLokal()
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
         })
-    }, [NetInfo]);
+    }, []);
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >

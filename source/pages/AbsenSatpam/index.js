@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, ScrollView, RefreshControl, AsyncStorage, Image } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, ScrollView, RefreshControl, AsyncStorage, Image, Alert } from 'react-native';
 import { Container, Text, Header, Title, Left, Body, Right, Button, ListItem, CheckBox, Item, Textarea, Spinner } from 'native-base';
 import ImgToBase64 from 'react-native-image-base64';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -24,6 +24,7 @@ const AbsenSatpam = ({ route }) => {
     const [dataLok, setdataLok] = useState([]);
     const [number, setnumber] = useState(-1);
     const [task, settask] = useState([]);
+    const [taskLokal, settaskLokal] = useState([]);
     const [note, setnote] = useState('');
     const [gambar, setgambar] = useState('');
     const [photo, setphoto] = useState('')
@@ -59,60 +60,55 @@ const AbsenSatpam = ({ route }) => {
         });
     }
 
-
+    var list = [];
     const add = () => {
-        NetInfo.addEventListener((state) => {
-            if (state.isConnected) {
-                // for (let index = 0; index < sub_task.length; index++) {
-                //     const data = {
-                //         "sub_task_id": index + 1,
-                //         "photo": "",
-                //         "checklist": "",
-                //         "note": "-"
-                //     }
-                //     settask((rev) => [...rev, data])
-
-                // }
-            } else {
-                for (let index = 0; index < listLocal.length; index++) {
-                    const data = {
-                        "sub_task_id": index + 1,
-                        "photo": "",
-                        "checklist": "",
-                        "note": "-"
-                    }
-                    settask((rev) => [...rev, data])
-
+        if (sub_task != null) {
+            for (let index = 0; index < sub_task.length; index++) {
+                const data = {
+                    "sub_task_id": index + 1,
+                    "photo": "",
+                    "checklist": "",
+                    "note": "-"
                 }
-
+                settask((rev) => [...rev, data])
             }
-        })
+        }
+
+        for (let index = 0; index < listLocal.length; index++) {
+            const data = {
+                "sub_task_id": index + 1,
+                "photo": "",
+                "checklist": "",
+                "note": "-"
+            }
+            settaskLokal((rev) => [...rev, data])
+        }
     }
 
 
     var parse;
     const getDataLocal = async () => {
-        const datalocal = await AsyncStorage.getItem('datalocal');
+        const datalocal = await AsyncStorage.getItem('lokalData');
         parse = JSON.parse(datalocal);
         var parser = parse;
-        console.log('Parser: ',parser);
+        console.log('Parser: ', parser);
         // AsyncStorage.removeItem('datalocal');
-        if (datalocal == null) {
-            // console.log(parser);
+        if (parser.length == 0) {
+            console.log('Data Async Lokal Kosong');
         } else {
             // console.log(parser);
             parser.map((e) => {
                 // console.log('E: ',e);
                 const isi = {
-                    'barcode':e.barcode,
-                    'id_lokasi':e.id_lokasi,
-                    'id_sync':e.id_sync,
-                    'lati':e.lati,
-                    'longi':e.longi,
-                    'tgl_absen':e.tgl_absen,
-                    'tasks':e.tasks
+                    'barcode': e.barcode,
+                    'id_lokasi': e.id_lokasi,
+                    'id_sync': e.id_sync,
+                    'lati': e.lati,
+                    'longi': e.longi,
+                    'tgl_absen': e.tgl_absen,
+                    'tasks': e.tasks
                 }
-                setdataLok((rev) => [...rev,isi])
+                setdataLok((rev) => [...rev, isi])
             })
         }
     }
@@ -130,10 +126,10 @@ const AbsenSatpam = ({ route }) => {
         } else {
             days = day
         }
-        setisLoading(true);
+        // setisLoading(true);
         Geolocation.getCurrentPosition(async (position) => {
-            NetInfo.addEventListener(async (state) => {
-                if(state.isConnected){
+            // NetInfo.addEventListener(async (state) => {
+            if (netInfo == true) {
                 const data = {
                     "data": [{
                         "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
@@ -168,7 +164,7 @@ const AbsenSatpam = ({ route }) => {
                 } catch (error) {
                     console.log('Error : ', error);
                 }
-                } else {         
+            } else {
                 const data =
                 {
                     "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
@@ -180,17 +176,36 @@ const AbsenSatpam = ({ route }) => {
                     'tasks': task
                 }
                 // dataLok.push(data)
-                setdataLok((rev) => [...rev,data])
-                console.log(dataLok);
-                AsyncStorage.setItem('datalocal', JSON.stringify(dataLok))
-                    .then((res) => {
+                setdataLok((rev) => [...rev, data])
+                console.log('DataLOk: ', dataLok);
+                AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                    .then(async (res) => {
                         console.log('Res', res);
-                        setisLoading(false)
-                        setmessageSuccess('Berhasil Simpan Data Lokal')
+                        if (res == undefined) {
+                            AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                            const DL = await AsyncStorage.getItem('lokalData')
+                            var par = JSON.parse(DL)
+                            console.log('INI DL: ', DL);
+                            if(par.length == 0){
+                                console.log('Ulangi');
+                                Alert.alert('Information', 'Klik Sekali lagi untuk simpan ke lokal')
+                            } else {
+                                console.log('sudah ada');
+                                // Alert.alert('Information', 'Data Sudah di simpan')
+                                setmessageSuccess('Berhasil Simpan Data Lokal')
+                            }
+                            // setisLoading(false)
+                            // setTimeout(async () => {
+                            //     AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                            //     const DL = await AsyncStorage.getItem('lokalData')
+                            //     console.log('INI DL Lokal: ', DL);
+
+                            // }, 1000);
+                        }
                     })
                     .catch((err) => console.log(err))
-                }
-            })
+            }
+            // })
 
             /////
         }, error => {
@@ -207,11 +222,12 @@ const AbsenSatpam = ({ route }) => {
         // console.log(sub_task);
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
+            console.log("net: ", netInfo);
         })
         getDataSubTaskLokal()
         add()
         getDataLocal()
-    }, [NetInfo]);
+    }, []);
 
     return (
         <Container>
@@ -228,17 +244,17 @@ const AbsenSatpam = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flex: 1.2 }} >
+                <Body style={{ flex: 0.7 }} >
                     <Title>Task</Title>
                 </Body>
-                <Right style={{ flex: 1 }} >
+                <Right style={{ flex: 0.5 }} >
                     <View style={styles.signal(netInfo)} />
                 </Right>
             </Header>
             <View style={{ flex: 1 }} >
                 <ScrollView>
                     {
-                        netInfo == false ?
+                        netInfo == true ?
                             // <View />
                             sub_task == null ?
                                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
@@ -271,11 +287,15 @@ const AbsenSatpam = ({ route }) => {
                                                     </View>
                                             }
                                         </View>
-                                        <View style={{ margin: 8 }} >
-                                            <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
-                                                <Text style={styles.btnFont} >Isi Task</Text>
-                                            </Button>
-                                        </View>
+                                        {
+                                            item.is_aktif == 1 ?
+                                                <View style={{ margin: 8 }} >
+                                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                                        <Text style={styles.btnFont} >Isi Task</Text>
+                                                    </Button>
+                                                </View>
+                                                : <View />
+                                        }
                                     </View>
                                 })
                             : listLocal.map((item, index) => {
@@ -304,11 +324,15 @@ const AbsenSatpam = ({ route }) => {
                                                 </View>
                                         }
                                     </View>
-                                    <View style={{ margin: 8 }} >
-                                        <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
-                                            <Text style={styles.btnFont} >Isi Task</Text>
-                                        </Button>
-                                    </View>
+                                    {
+                                        item.is_aktif == 1 ?
+                                            <View style={{ margin: 8 }} >
+                                                <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                                    <Text style={styles.btnFont} >Isi Task</Text>
+                                                </Button>
+                                            </View>
+                                            : <View />
+                                    }
                                 </View>
                             })
                     }
@@ -364,17 +388,36 @@ const AbsenSatpam = ({ route }) => {
                         </View>
                         <View style={{ margin: 8 }} >
                             <Button full style={styles.btnSubmit} onPress={() => {
-                                setnumber(-1)
-                                setgambar('');
-                                setnote('')
-                                settask(false);
-                                let temp_state = [...task];
-                                let temp_element = { ...temp_state[number] };
-                                temp_element.photo = photo;
-                                temp_element.note = note;
-                                temp_element.checklist = check;
-                                temp_state[number] = temp_element;
-                                settask(temp_state);
+                                if (!gambar) {
+                                    Alert.alert('Alert', 'Gambar Harus di isi');
+                                    return true;
+                                } else if (!note) {
+                                    Alert.alert('Alert', 'Note Harus di isi');
+                                    return true;
+                                } else if (!check) {
+                                    Alert.alert('Alert', 'Check Harus di isi');
+                                    return true;
+                                } else {
+                                    setnumber(-1)
+                                    setgambar('');
+                                    setnote('');
+                                    setcheck(false);
+                                    // settask(false);
+                                    let temp_state = [...task];
+                                    let temp_state_lokal = [...taskLokal];
+                                    let temp_element = { ...temp_state[number] };
+                                    let temp_element_lokal = { ...temp_state_lokal[number] };
+                                    temp_element.photo = photo;
+                                    temp_element_lokal.photo = photo;
+                                    temp_element.note = note;
+                                    temp_element_lokal.note = note;
+                                    temp_element.checklist = check;
+                                    temp_element_lokal.checklist = check;
+                                    temp_state[number] = temp_element;
+                                    temp_state_lokal[number] = temp_element_lokal;
+                                    settask(temp_state);
+                                    settaskLokal(temp_state_lokal)
+                                }
                             }} >
                                 <Text style={styles.btnFont} >Submit</Text>
                             </Button>
@@ -382,7 +425,7 @@ const AbsenSatpam = ({ route }) => {
                                 setnumber(-1)
                                 setgambar('');
                                 setnote('')
-                                settask(false);
+                                // settask(false);
                             }} >
                                 <Text style={styles.btnFont} >Batal</Text>
                             </Button>

@@ -32,7 +32,7 @@ const EditCheckPoint = ({ route }) => {
     const [errKet, seterrKet] = useState('');
 
     const getLokasi = () => {
-        Geolocation.watchPosition((position) => {
+        Geolocation.getCurrentPosition((position) => {
             const { latitude, longitude } = position.coords;
             setcurrentPosition({
                 ...currentPosition,
@@ -45,9 +45,7 @@ const EditCheckPoint = ({ route }) => {
             enableHighAccuracy: true,
             distanceFilter: 0,
             useSignificantChanges: true,
-            accuracy: 1,
-            interval: 10000,
-            fastestInterval: 10000
+            maximumAge: 0
         })
     }
 
@@ -71,8 +69,8 @@ const EditCheckPoint = ({ route }) => {
             'keterangan': keterangan,
             'user_creator': barcode
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
+        // NetInfo.addEventListener(async (state) => {
+            if (netInfo == true) {
                 setisLoading(true);
                 try {
                     const response = await fetch(apiUpdateCheckPoint(), {
@@ -108,7 +106,7 @@ const EditCheckPoint = ({ route }) => {
                 }
                 updateValueTableCheckpoint(nama_lokasi, currentPosition.latitude, currentPosition.longitude, keterangan, date, barcode, id);
             }
-        })
+        // })
     }
     useEffect(() => {
         getLokasi()
@@ -117,7 +115,7 @@ const EditCheckPoint = ({ route }) => {
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
         })
-    }, [NetInfo]);
+    }, []);
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
@@ -153,13 +151,17 @@ const EditCheckPoint = ({ route }) => {
                                     zoomControlEnabled={true}
                                     initialRegion={currentPosition}
                                 >
-                                    <Marker
-                                        pinColor='#2196f3'
-                                        coordinate={{
-                                            latitude: lati,
-                                            longitude: longi,
-                                        }}
-                                    />
+                                    {
+                                        currentPosition.latitude ?
+                                            <Marker
+                                                pinColor='#2196f3'
+                                                coordinate={{
+                                                    latitude: lati,
+                                                    longitude: longi,
+                                                }}
+                                            />
+                                            : <View />
+                                    }
                                 </MapView>
                         }
                     </View>

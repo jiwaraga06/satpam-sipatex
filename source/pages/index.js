@@ -6,6 +6,7 @@ import TabView from "./Tab";
 import Datalokal from "./DataLokal";
 import DatalokalTask from "./DataLokalTask";
 import LocalCheckpoint from "./LokalCheckpoint";
+import HistoryTransaksiAbsen from "./HistoryTransaksiAbsen";
 import TestLocal from "./TestJSON";
 import SplashScreen from "./SplashScreen";
 import AbsenSatpam from "./AbsenSatpam";
@@ -26,6 +27,7 @@ export {
     TestLocal,
     LocalCheckpoint,
     Datalokal,
+    HistoryTransaksiAbsen,
     DatalokalTask,
     TabView,
     AbsenSatpam,

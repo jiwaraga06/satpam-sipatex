@@ -17,24 +17,27 @@ const Datalokal = () => {
 
     var parse;
     const getDataLocal = async () => {
-        const datalocal = await AsyncStorage.getItem('datalocal');
+        setisLoading(true);
+        const datalocal = await AsyncStorage.getItem('lokalData');
         parse = JSON.parse(datalocal);
         var parser = parse;
-        console.log(parse);
+        console.log('Lokal: ',parse);
         // AsyncStorage.removeItem('datalocal');
         if (datalocal == null) {
+            setisLoading(false);
             // console.log(parser);
         } else {
+            setisLoading(false);
             // console.log(parser);
             setlist(parser)
         }
     }
 
     const uploadServer = async () => {
-        const datalocal = await AsyncStorage.getItem('datalocal');
+        const datalocal = await AsyncStorage.getItem('lokalData');
         parse = JSON.parse(datalocal);
         const data = {
-            'data' :parse
+            'data': parse
         }
         setisLoading(true)
         try {
@@ -53,6 +56,7 @@ const Datalokal = () => {
                 setmessage(json.message);
                 setisLoading(false)
             } else {
+                AsyncStorage.setItem('lokalData', JSON.stringify([]))
                 getDataLocal()
                 setmessageSuccess(json.message);
                 setisLoading(false)
@@ -65,6 +69,7 @@ const Datalokal = () => {
 
     useEffect(() => {
         getDataLocal()
+        // AsyncStorage.setItem('lokalData', JSON.stringify([]))
     }, []);
 
     return (
@@ -90,11 +95,11 @@ const Datalokal = () => {
                 <ScrollView
                     contentContainerStyle={{ flexGrow: 1 }}>
                     {
-                        // list.length == 0 ?
-                        //     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-                        //         <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Lokal Kosong</Text>
-                        //     </View>
-                            // : 
+                        list.length == 0 ?
+                            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                                <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Lokal Kosong</Text>
+                            </View>
+                            :
                             list.map((item, index) => {
                                 return <View key={index} >
                                     <View style={styles.card} >
@@ -118,8 +123,9 @@ const Datalokal = () => {
                     }
                 </ScrollView>
                 <View style={{ margin: 8 }} >
-                    <Button full style={{ backgroundColor: '#2e7d32', borderRadius: 6, elevation: 6 }} 
-                    onPress={uploadServer}>
+                    <Button full style={{ backgroundColor: list.length == 0 ? '#bdbdbd' : '#2e7d32', borderRadius: 6, elevation: 6 }}
+                        disabled={list.length == 0 ? true : false}
+                        onPress={uploadServer}>
                         <Text style={{ fontSize: 16, fontWeight: '700' }} >Upload Data ke Server</Text>
                     </Button>
                 </View>

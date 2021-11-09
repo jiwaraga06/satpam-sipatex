@@ -11,6 +11,7 @@ import {
     SplashScreen,
     LocalCheckpoint,
     Datalokal,
+    HistoryTransaksiAbsen,
     DatalokalTask,
     TestLocal,
     ScanQR,
@@ -50,6 +51,7 @@ const Router = () => {
                 <Stack.Screen name="TestLocal" component={TestLocal} options={{ headerShown: false }} />
                 <Stack.Screen name="Datalokal" component={Datalokal} options={{ headerShown: false }} />
                 <Stack.Screen name="DatalokalTask" component={DatalokalTask} options={{ headerShown: false }} />
+                <Stack.Screen name="HistoryTransaksiAbsen" component={HistoryTransaksiAbsen} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     )

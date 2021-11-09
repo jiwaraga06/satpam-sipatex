@@ -111,7 +111,8 @@ const CheckPoint = () => {
                 getDataCheckpointLokal()
             }
         })
-        // getDataCheckpointLokal()
+        getDataCheckpoint()
+        getDataCheckpointLokal()
         getLokasi()
     }, [NetInfo]);
     return (
@@ -167,53 +168,55 @@ const CheckPoint = () => {
                                                         zoomControlEnabled={true}
                                                         initialRegion={currentPosition}>
                                                         {
-                                                            list.map((item, index) => {
-                                                                return <Marker
-                                                                    pinColor='#2196f3'
-                                                                    key={index}
-                                                                    coordinate={{
-                                                                        latitude: item.lati,
-                                                                        longitude: item.longi,
-                                                                    }}
-                                                                    title={item.nama_lokasi}
-                                                                    description={item.keterangan}>
-                                                                    <Callout
-                                                                        onPress={() => {
-                                                                            Alert.alert(
-                                                                                "Checkpoint",
-                                                                                `${item.nama_lokasi}`,
-                                                                                [
-                                                                                    {
-                                                                                        text: "Tutup",
-                                                                                        style: "cancel"
-                                                                                    },
-                                                                                    {
-                                                                                        text: "Ubah",
-                                                                                        onPress: () => navigation.navigate('EditCheckPoint', {
-                                                                                            id: item.id,
-                                                                                            lati: item.lati,
-                                                                                            longi: item.longi,
-                                                                                            namaLokasi: item.nama_lokasi,
-                                                                                            ket: item.keterangan
-                                                                                        }),
-                                                                                    },
-                                                                                    {
-                                                                                        text: "Lihat Task",
-                                                                                        onPress: () => navigation.navigate('CheckPointTask', {
-                                                                                            task: item.tasks,
-                                                                                            id_lokasi: item.id
-                                                                                        })
-                                                                                    }
-                                                                                ])
+                                                            currentPosition.latitude == null ?
+                                                                <View />
+                                                                : list.map((item, index) => {
+                                                                    return <Marker
+                                                                        pinColor='#2196f3'
+                                                                        key={index}
+                                                                        coordinate={{
+                                                                            latitude: item.lati,
+                                                                            longitude: item.longi,
                                                                         }}
-                                                                    >
-                                                                        <View style={{ margin: 8 }} >
-                                                                            <Text style={{ fontSize: 17 }} >{item.nama_lokasi}</Text>
-                                                                            <Text style={{ fontSize: 15 }} >{item.keterangan}</Text>
-                                                                        </View>
-                                                                    </Callout>
-                                                                </Marker>
-                                                            })
+                                                                        title={item.nama_lokasi}
+                                                                        description={item.keterangan}>
+                                                                        <Callout
+                                                                            onPress={() => {
+                                                                                Alert.alert(
+                                                                                    "Checkpoint",
+                                                                                    `${item.nama_lokasi}`,
+                                                                                    [
+                                                                                        {
+                                                                                            text: "Tutup",
+                                                                                            style: "cancel"
+                                                                                        },
+                                                                                        {
+                                                                                            text: "Ubah",
+                                                                                            onPress: () => navigation.navigate('EditCheckPoint', {
+                                                                                                id: item.id,
+                                                                                                lati: item.lati,
+                                                                                                longi: item.longi,
+                                                                                                namaLokasi: item.nama_lokasi,
+                                                                                                ket: item.keterangan
+                                                                                            }),
+                                                                                        },
+                                                                                        {
+                                                                                            text: "Lihat Task",
+                                                                                            onPress: () => navigation.navigate('CheckPointTask', {
+                                                                                                task: item.tasks,
+                                                                                                id_lokasi: item.id
+                                                                                            })
+                                                                                        }
+                                                                                    ])
+                                                                            }}
+                                                                        >
+                                                                            <View style={{ margin: 8 }} >
+                                                                                <Text style={{ fontSize: 17 }} >{item.nama_lokasi}</Text>
+                                                                                <Text style={{ fontSize: 15 }} >{item.keterangan}</Text>
+                                                                            </View>
+                                                                        </Callout>
+                                                                    </Marker>
+                                                                })
                                                         }
                                                     </MapView>
                                             }
@@ -264,8 +267,9 @@ const CheckPoint = () => {
                                                         mapType='hybrid'
                                                         zoomControlEnabled={true}
                                                         initialRegion={currentPosition}>
-                                                        {
-                                                            listLocal.map((item, index) => {
+                                                        {currentPosition.latitude == null ?
+                                                            <View />
+                                                            : listLocal.map((item, index) => {
                                                                 return <Marker
                                                                     pinColor='#2196f3'
                                                                     key={index}
@@ -348,8 +352,9 @@ const CheckPoint = () => {
                     }
                 </ScrollView>
                 <View style={{ margin: 8 }} >
-                    <Button full style={styles.btnView(netInfo == false ? listLocal.length : list.length)}
-                        onPress={() => setviewMap(!viewMap)}>
+                    <Button full style={styles.btnView(netInfo)}
+                        onPress={() => setviewMap(!viewMap)}
+                        disabled={netInfo == true ? false : true} >
                         {
                             viewMap == true ?
                                 <Text style={styles.btnFont} >Tampilan Data</Text>
@@ -357,18 +362,12 @@ const CheckPoint = () => {
                         }
                     </Button>
                     <Button full style={styles.btnTambah} onPress={() => {
-                        if(netInfo == false) {
                             listLocal.map((item, index) => {
                                 navigation.navigate('AddCheckPoint', {
                                     id_checkpoint: item.id_checkpoint
                                 })
                                 console.log(item.id_checkpoint);
                             })
-                        } else {
-                            navigation.navigate('AddCheckPoint', {
-                                id_checkpoint: 'dari online'
-                            })
-                        }
                     }} >
                         <Text style={styles.btnFont} >Tambah Checkpoint</Text>
                     </Button>
@@ -436,7 +435,7 @@ const styles = StyleSheet.create({
     },
     btnView: (list) => ({
         margin: 8,
-        backgroundColor: list == 0 ? '#bdbdbd' : '#00695c',
+        backgroundColor: list == false ? '#bdbdbd' : '#00695c',
         borderRadius: 6,
         elevation: 6
     }),

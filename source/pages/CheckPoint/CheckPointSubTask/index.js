@@ -17,6 +17,32 @@ const CheckPointSubTask = ({ route }) => {
     const [listLocal, setlistLocal] = useState([]);
     const [netInfo, setnetInfo] = useState(false);
 
+    const getDataCheckpoint = async () => {
+        const barcode = await AsyncStorage.getItem('barcode');
+        setisLoading(true)
+        try {
+            const response = await fetch(apiDataCheckPoint(barcode), {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': apiToken()
+                }
+            });
+            const json = await response.json()
+            console.log('Result : ', json);
+            if (json.errors) {
+                setisLoading(false)
+                setmessage(json.errors.user_creator);
+            } else {
+                setisLoading(false)
+                setlist(json)
+            }
+        } catch (error) {
+            console.log('Error : ', error);
+        }
+    }
+
+
     const getDataSubTaskLokal = () => {
         setisLoading(true)
         db.transaction((tx) => {
@@ -39,12 +65,13 @@ const CheckPointSubTask = ({ route }) => {
     }, [isLoading]);
 
     useEffect(() => {
-        console.log('Sub task :',id_task);
+        console.log('ID task :',id_task);
+        console.log(sub_task);
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
         })
         getDataSubTaskLokal()
-    }, [NetInfo]);
+    }, []);
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
@@ -75,7 +102,7 @@ const CheckPointSubTask = ({ route }) => {
                     }>
                     {
                         netInfo == true ?
-                            sub_task == null ?
+                            sub_task.length == 0 ?
                                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                                     <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Local Kosong</Text>
                                 </View>

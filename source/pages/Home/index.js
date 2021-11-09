@@ -107,7 +107,7 @@ const Home = () => {
                 })
             } else {
                 insertValueTableHistorySecurity(barcode, nama, latitude, longitude, warna, gender, date);
-                console.log('Signal offline');
+                // console.log('Signal offline');
             }
         })
     }
@@ -221,8 +221,8 @@ const Home = () => {
 
     const saveLocal = async () => {
         var array = [];
-        settask([]);
-        setsub_task([]);
+        // settask([]);
+        // setsub_task([]);
         const barcode = await AsyncStorage.getItem('barcode');
         try {
             const response = await fetch(apiDataCheckPoint(barcode), {
@@ -233,82 +233,45 @@ const Home = () => {
                 }
             });
             const json = await response.json();
-            // console.log('Result : ', json);
-            // console.log('Array : ',array);
-            // console.log(json);
-            setcheckpoint(json)
-            // settask(json)
-            // array.push(json)
-            // console.log(checkpoint);
-            checkpoint.map((item, index) => {
-                settask((rev) => [...rev, item.tasks])
-
-                // settask(item.tasks)
-                const cp = {
-                    'id': item.tasks
-                }
-                // console.log(cp);
-                const t = {
-                    'id': item.id,
-                    'id_lokasi': item.id_lokasi
-                }
-                // console.log(item.tasks);
-                // console.log(item);
-                // settask(item.tasks)
-
-                // insertValueTableCheckpoint(
-                //     item.id,
-                //     item.nama_lokasi,
-                //     item.lati,
-                //     item.longi,
-                //     item.keterangan,
-                //     item.created_at,
-                //     item.updated_at,
-                //     item.user_creator
-                // );
-            })
-            task.map((items, ix) => {
-                // console.log(items);
-                items.map((e, i) => {
-                    if (e.sub_task.length != 0) {
-                        // console.log("e : ", e.sub_task);
-                        setsub_task((rev) => [...rev, e.sub_task]);
-                    } else {
-                        // console.log('sub task ini kosong');
-                    }
-                    // insertValueTableTask(
-                    //     e.id,
-                    //     e.id_lokasi,
-                    //     e.task,
-                    //     e.user_creator,
-                    //     e.created_at,
-                    //     e.updated_at,
-                    // )
+            array.push(json)
+            array.map((data, index) => {
+                data.map((item, ix) => {
+                    // console.log(item);
+                    insertValueTableCheckpoint(
+                        item.id,
+                        item.nama_lokasi,
+                        item.lati,
+                        item.longi,
+                        item.keterangan,
+                        item.created_at,
+                        item.updated_at,
+                        item.user_creator
+                    );
+                    item.tasks.map((e, i) => {
+                        // console.log(e);
+                        insertValueTableTask(
+                            e.id,
+                            e.id_lokasi,
+                            e.task,
+                            e.user_creator,
+                            e.created_at,
+                            e.updated_at,
+                        )
+                        e.sub_task.map((sb, id) => {
+                            console.log(sb);
+                            insertValueTableSubTask(
+                                sb.id,
+                                sb.id_task,
+                                sb.sub_task,
+                                sb.keterangan,
+                                sb.is_aktif,
+                                sb.created_at,
+                                sb.updated_at,
+                            )
+                        })
+                    })
                 })
             })
-            sub_task.map((data, i) => {
-                data.map((f, idx) => {
-                    // console.log(f);
-                    insertValueTableSubTask(
-                        f.id,
-                        f.id_task,
-                        f.sub_task,
-                        f.keterangan,
-                        f.is_aktif,
-                        f.created_at,
-                        f.updated_at,
-                    )
-                })
-            })
-            // console.log(task);
-            // console.log(sub_task);
-            // if (json.errors) {
-            //     console.log('Errors');
-            // } else {
-            //     setcheckpoint(json);
-            //     settask(checkpoint.tasks);
-            //     setsub_task(task.sub_task);
-            // }
         } catch (error) {
             console.log('Error get api data checkpoint : ', error);
         }
@@ -342,6 +305,7 @@ const Home = () => {
             })
         }
     }
+    var intervalSaveLokal;
 
     useEffect(() => {
         const socket = io.connect(sockectVariable);
@@ -355,7 +319,7 @@ const Home = () => {
         socket.on('disconnect', () => {
             console.log('socket disconnect');
         })
-        saveLocal();
+        saveLocal()
         getDataLocal();
         intervalPost = BackgroundTimer.setInterval(() => {
             postOnline()
@@ -393,42 +357,88 @@ const Home = () => {
                 <ScrollView>
                     <View style={{ margin: 8 }} >
                         <Text style={styles.font} >Information</Text>
-                        <View style={styles.viewInfo} >
-                            {
-                                <View>
-                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
-                                    <Button full style={{ backgroundColor: '#ff9800', borderRadius: 6, height: 33, margin: 8 }}
-                                        onPress={() => {
-                                            navigation.navigate('Datalokal')
-                                        }}>
-                                        <Text>Data lokal</Text>
-                                    </Button>
-                                </View>
-                            }
-                            <MaterialCommunityIcons
-                                name='database'
-                                color='white'
-                                size={50}
-                            />
-                        </View>
-                        <View style={styles.viewCheckpoint} >
-                            {
-                                <View>
-                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
-                                    <Button full style={{ backgroundColor: '#1e88e5', borderRadius: 6, height: 33, margin: 8 }}
-                                        onPress={() => {
-                                            navigation.navigate('LocalCheckpoint')
-                                        }}>
-                                        <Text>Lokal Checkpoint</Text>
-                                    </Button>
-                                </View>
-                            }
-                            <MaterialCommunityIcons
-                                name='database'
-                                color='white'
-                                size={50}
-                            />
-                        </View>
+                        {
+                            role.length == 0 ?
+                                <Spinner color='black' />
+                                : role.length > 1 ?
+                                    <View>
+                                        <View style={styles.viewInfo} >
+                                            {
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local Transaksi</Text>
+                                                    <Button full style={{ backgroundColor: '#ff9800', borderRadius: 6, height: 33, margin: 8 }}
+                                                        onPress={() => {
+                                                            navigation.navigate('Datalokal')
+                                                        }}>
+                                                        <Text>Data lokal</Text>
+                                                    </Button>
+                                                </View>
+                                            }
+                                            <MaterialCommunityIcons
+                                                name='database'
+                                                color='white'
+                                                size={50}
+                                            />
+                                        </View>
+                                        <View style={styles.viewCheckpoint} >
+                                            {
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local Checkpoint</Text>
+                                                    <Button full style={{ backgroundColor: '#1e88e5', borderRadius: 6, height: 33, margin: 8 }}
+                                                        onPress={() => {
+                                                            navigation.navigate('LocalCheckpoint')
+                                                        }}>
+                                                        <Text>Lokal Checkpoint</Text>
+                                                    </Button>
+                                                </View>
+                                            }
+                                            <MaterialCommunityIcons
+                                                name='database'
+                                                color='white'
+                                                size={50}
+                                            />
+                                        </View>
+                                    </View>
+                                    : role[0] == 'admin_scr' ?
+                                        <View style={styles.viewCheckpoint} >
+                                            {
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
+                                                    <Button full style={{ backgroundColor: '#1e88e5', borderRadius: 6, height: 33, margin: 8 }}
+                                                        onPress={() => {
+                                                            navigation.navigate('LocalCheckpoint')
+                                                        }}>
+                                                        <Text>Lokal Checkpoint</Text>
+                                                    </Button>
+                                                </View>
+                                            }
+                                            <MaterialCommunityIcons
+                                                name='database'
+                                                color='white'
+                                                size={50}
+                                            />
+                                        </View>
+                                        :
+                                        <View style={styles.viewInfo} >
+                                            {
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
+                                                    <Button full style={{ backgroundColor: '#ff9800', borderRadius: 6, height: 33, margin: 8 }}
+                                                        onPress={() => {
+                                                            navigation.navigate('Datalokal')
+                                                        }}>
+                                                        <Text>Data lokal</Text>
+                                                    </Button>
+                                                </View>
+                                            }
+                                            <MaterialCommunityIcons
+                                                name='database'
+                                                color='white'
+                                                size={50}
+                                            />
+                                        </View>
+                        }
+
                     </View>
                     <View style={{ margin: 8 }} >
                         <Text style={styles.font} >Menu</Text>
@@ -442,9 +452,9 @@ const Home = () => {
                                         <View style={styles.checkPoint} >
                                             <View>
                                                 <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data CheckPoint</Text>
-                                                <Button style={{ height: 35, margin: 8, borderRadius: 6 }}
+                                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
                                                     onPress={() => navigation.navigate('CheckPoint')}>
-                                                    <Text>Lihat Data</Text>
+                                                    <Text style={{ color: '#112D4E' }} >Lihat Data</Text>
                                                 </Button>
                                             </View>
                                             <MaterialIcons
@@ -458,13 +468,29 @@ const Home = () => {
                                         <View style={styles.menuScanQR} >
                                             <View>
                                                 <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Scan QR Code</Text>
-                                                <Button style={{ height: 35, margin: 8, borderRadius: 6 }}
+                                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
                                                     onPress={() => navigation.navigate('ScanQR')} >
-                                                    <Text>Scan Disini</Text>
+                                                    <Text style={{ color: '#0277bd' }} >Scan Disini</Text>
                                                 </Button>
                                             </View>
                                             <MaterialIcons
                                                 name='qr-code-2'
+                                                color='white'
+                                                size={40}
+                                            />
+                                        </View>
+                                    </View>
+                                    <View style={{ margin: 8 }} >
+                                        <View style={styles.viewHistory} >
+                                            <View>
+                                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >History Transaksi</Text>
+                                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
+                                                    onPress={() => navigation.navigate('HistoryTransaksiAbsen')} >
+                                                    <Text style={{ color: '#009688' }} >Lihat Data</Text>
+                                                </Button>
+                                            </View>
+                                            <MaterialIcons
+                                                name='history'
                                                 color='white'
                                                 size={40}
                                             />
@@ -477,9 +503,9 @@ const Home = () => {
                                             <View style={styles.checkPoint} >
                                                 <View>
                                                     <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data CheckPoint</Text>
-                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6 }}
+                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
                                                         onPress={() => navigation.navigate('CheckPoint')}>
-                                                        <Text>Lihat Data</Text>
+                                                        <Text style={{ color: '#112D4E' }} >Lihat Data</Text>
                                                     </Button>
                                                 </View>
                                                 <MaterialIcons
@@ -489,41 +515,75 @@ const Home = () => {
                                                 />
                                             </View>
                                         </View>
+                                        <View style={{ margin: 8 }} >
+                                            <View style={styles.viewHistory} >
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >History Transaksi</Text>
+                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
+                                                        onPress={() => navigation.navigate('HistoryTransaksiAbsen')} >
+                                                        <Text style={{ color: '#009688' }} >Lihat Data</Text>
+                                                    </Button>
+                                                </View>
+                                                <MaterialIcons
+                                                    name='history'
+                                                    color='white'
+                                                    size={40}
+                                                />
+                                            </View>
+                                        </View>
                                     </View>
                                     : <View>
-                                        <View style={styles.menuScanQR} >
-                                            <View>
-                                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Scan QR Code</Text>
-                                                <Button style={{ height: 35, margin: 8, borderRadius: 6 }}
-                                                    onPress={() => navigation.navigate('ScanQR')} >
-                                                    <Text>Scan Disini</Text>
-                                                </Button>
+                                        <View style={{ margin: 8 }} >
+                                            <View style={styles.menuScanQR} >
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Scan QR Code</Text>
+                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
+                                                        onPress={() => navigation.navigate('ScanQR')} >
+                                                        <Text style={{ color: '#0277bd' }} >Scan Disini</Text>
+                                                    </Button>
+                                                </View>
+                                                <MaterialIcons
+                                                    name='qr-code-2'
+                                                    color='white'
+                                                    size={40}
+                                                />
                                             </View>
-                                            <MaterialIcons
-                                                name='qr-code-2'
-                                                color='white'
-                                                size={40}
-                                            />
+                                        </View>
+                                        <View style={{ margin: 8 }} >
+                                            <View style={styles.viewHistory} >
+                                                <View>
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >History Transaksi</Text>
+                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
+                                                        onPress={() => navigation.navigate('HistoryTransaksiAbsen')} >
+                                                        <Text style={{ color: '#009688' }} >Lihat Data</Text>
+                                                    </Button>
+                                                </View>
+                                                <MaterialIcons
+                                                    name='history'
+                                                    color='white'
+                                                    size={40}
+                                                />
+                                            </View>
                                         </View>
                                     </View>
                     }
 
-                        <View style={{ margin: 8 }} >
-                            <View style={styles.logout} >
-                                <View>
-                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Keluar Akun</Text>
-                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, backgroundColor: 'white' }}
-                                        onPress={logOut}  >
-                                        <Text style={{ color: '#c62828' }} >Keluar Akun</Text>
-                                    </Button>
-                                </View>
-                                <MaterialCommunityIcons
-                                    name='logout'
-                                    color='white'
-                                    size={40}
-                                />
+                    <View style={{ margin: 8 }} >
+                        <View style={styles.logout} >
+                            <View>
+                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Keluar Akun</Text>
+                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
+                                    onPress={logOut}  >
+                                    <Text style={{ color: '#c62828' }} >Keluar Akun</Text>
+                                </Button>
                             </View>
+                            <MaterialCommunityIcons
+                                name='logout'
+                                color='white'
+                                size={40}
+                            />
                         </View>
+                    </View>
                 </ScrollView>
             </View>
             {/* LOADING */}
@@ -577,6 +637,17 @@ const styles = StyleSheet.create({
     viewCheckpoint: {
         marginTop: 8,
         backgroundColor: '#105652',
+        borderRadius: 6,
+        elevation: 6,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 20,
+        height: 120
+    },
+    viewHistory: {
+        marginTop: 8,
+        backgroundColor: '#009688',
         borderRadius: 6,
         elevation: 6,
         flexDirection: 'row',

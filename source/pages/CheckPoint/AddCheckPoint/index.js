@@ -34,7 +34,7 @@ const AddCheckPoint = ({ route }) => {
     const [errKet, seterrKet] = useState('');
 
     const getLokasi = () => {
-        Geolocation.watchPosition((position) => {
+        Geolocation.getCurrentPosition((position) => {
             const { latitude, longitude } = position.coords;
             setcurrentPosition({
                 ...currentPosition,
@@ -47,9 +47,7 @@ const AddCheckPoint = ({ route }) => {
             enableHighAccuracy: true,
             distanceFilter: 0,
             useSignificantChanges: true,
-            accuracy: 1,
-            interval: 10000,
-            fastestInterval: 10000
+            maximumAge: 0
         })
     }
 
@@ -72,52 +70,53 @@ const AddCheckPoint = ({ route }) => {
             'keterangan': keterangan,
             'user_creator': barcode
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
-                setisLoading(true);
-                try {
-                    const response = await fetch(apiSimpanCheckPoint(), {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': apiToken()
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    const json = await response.json();
-                    // console.log(json);
-                    if (json.errors) {
-                        setisLoading(false);
-                        setmessage(json.message);
-                        seterrKet(json.errors.keterangan);
-                        seterrNamaLok(json.errors.nama_lokasi);
-                    } else {
-                        setisLoading(false);
-                        setmessagesuccess(json);
-                        // navigation.goBack();
-                    }
-                } catch (error) {
-                    console.log('Error Tambah Checkpoint : ', error);
-                    Alert.alert('information', error)
+
+        if (netInfo == true) {
+            setisLoading(true);
+            try {
+                const response = await fetch(apiSimpanCheckPoint(), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                // console.log(json);
+                if (json.errors) {
+                    setisLoading(false);
+                    setmessage(json.message);
+                    seterrKet(json.errors.keterangan);
+                    seterrNamaLok(json.errors.nama_lokasi);
+                } else {
+                    setisLoading(false);
+                    setmessagesuccess(json);
+                    // navigation.goBack();
                 }
-            } else {
-                if (!nama_lokasi && !keterangan) {
-                    seterrNamaLok('Nama Lokasi Tidak Boleh Kosong')
-                    seterrKet('Keterangan Tidak Boleh Kosong')
-                    return true;
-                }
-                insertValueTableCheckpointForm(id_checkpoint, nama_lokasi, currentPosition.latitude, currentPosition.longitude, keterangan, date, date, barcode);
+            } catch (error) {
+                console.log('Error Tambah Checkpoint : ', error);
+                Alert.alert('information', error)
             }
-        })
+        } else {
+            if (!nama_lokasi && !keterangan) {
+                seterrNamaLok('Nama Lokasi Tidak Boleh Kosong')
+                seterrKet('Keterangan Tidak Boleh Kosong')
+                return true;
+            }
+            insertValueTableCheckpointForm(id_checkpoint, nama_lokasi, currentPosition.latitude, currentPosition.longitude, keterangan, date, date, barcode);
+        }
+
 
     }
     useEffect(() => {
         getLokasi()
+        console.log(id_checkpoint);
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
         })
-    }, [NetInfo]);
+    }, []);
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >

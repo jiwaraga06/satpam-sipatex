@@ -218,23 +218,23 @@ const insertValueTableTask = (id_task, id_lokasi, task, user_creator, created_at
                     //         if (results.rows.length == 0) {
                     //             console.log('task beda');
                     //             console.log('   ');
-                                db.transaction(function (tx) {
-                                    tx.executeSql(
-                                        'UPDATE table_task set task=?, user_creator=?, updated_at=? WHERE id_task=?',
-                                        [task, user_creator, updated_at, id_task],
-                                        (tx, results) => {
-                                            // console.log("result: ",results);
-                                            if (results.rowsAffected > 0) {
-                                                // Alert.alert('Information', 'Data Berhasil di update di Local')
-                                                console.log('Success update value task security');
-                                            } else {
-                                                // console.log('Failed: ',results.rowsAffected);
-                                                // Alert.alert('Information', 'Data Gagal di Update di Local')
-                                                console.log('Failed update value task security');
-                                            }
-                                        }
-                                    );
-                                });
+                    db.transaction(function (tx) {
+                        tx.executeSql(
+                            'UPDATE table_task set task=?, user_creator=?, updated_at=? WHERE id_task=?',
+                            [task, user_creator, updated_at, id_task],
+                            (tx, results) => {
+                                // console.log("result: ",results);
+                                if (results.rowsAffected > 0) {
+                                    // Alert.alert('Information', 'Data Berhasil di update di Local')
+                                    console.log('Success update value task security');
+                                } else {
+                                    // console.log('Failed: ',results.rowsAffected);
+                                    // Alert.alert('Information', 'Data Gagal di Update di Local')
+                                    console.log('Failed update value task security');
+                                }
+                            }
+                        );
+                    });
                     //         } else {
                     //             console.log('task sama');
                     //         }
@@ -260,7 +260,7 @@ const insertValueTableTask = (id_task, id_lokasi, task, user_creator, created_at
 
     });
 }
-const insertValueTableTaskForm = (id_lokasi, task, user_creator, created_at, updated_at) => {
+const insertValueTableTaskForm = (id_lokasi, id_task, task, user_creator, created_at, updated_at) => {
     db.transaction(function (tx) {
         tx.executeSql(
             'SELECT * FROM table_task WHERE id_lokasi=?',
@@ -272,8 +272,8 @@ const insertValueTableTaskForm = (id_lokasi, task, user_creator, created_at, upd
                 } else {
                     console.log('Data Belum ada Task');
                     tx.executeSql(
-                        'INSERT INTO table_task (id_lokasi, task, user_creator, created_at, updated_at, isOffline) VALUES (?,?,?,?,?,?)',
-                        [id_lokasi, task, user_creator, created_at, updated_at, 1],
+                        'INSERT INTO table_task (id_lokasi,id_task, task, user_creator, created_at, updated_at, isOffline) VALUES (?,?,?,?,?,?,?)',
+                        [id_lokasi, id_task, task, user_creator, created_at, updated_at, 1],
                         (tx, results) => {
                             if (results.rowsAffected > 0) {
                                 Alert.alert('Information', 'Data Berhasil di Simpan di Local')
@@ -389,7 +389,7 @@ const insertValueTableSubTask = (id_sub_task, id_task, sub_task, keterangan, is_
         )
     });
 }
-const insertValueTableSubTaskForm = (id_task, sub_task, keterangan, created_at, updated_at, is_aktif) => {
+const insertValueTableSubTaskForm = (id_task, id_sub_task, sub_task, keterangan, created_at, updated_at, is_aktif) => {
     db.transaction(function (tx) {
         tx.executeSql(
             'SELECT * FROM table_sub_task WHERE id_task= ? AND sub_task= ? AND keterangan= ? AND is_aktif= ? AND created_at= ? AND updated_at= ?',
@@ -401,8 +401,8 @@ const insertValueTableSubTaskForm = (id_task, sub_task, keterangan, created_at, 
                 } else {
                     console.log('Data Belum ada sub task');
                     tx.executeSql(
-                        'INSERT INTO table_sub_task (id_task, sub_task, keterangan, is_aktif, created_at, updated_at,isOffline ) VALUES (?,?,?,?,?,?,?)',
-                        [id_task, sub_task, keterangan, is_aktif, created_at, updated_at, 1],
+                        'INSERT INTO table_sub_task (id_task,id_sub_task, sub_task, keterangan, is_aktif, created_at, updated_at,isOffline ) VALUES (?,?,?,?,?,?,?,?)',
+                        [id_task, id_sub_task, sub_task, keterangan, is_aktif, created_at, updated_at, 1],
                         (tx, results) => {
                             if (results.rowsAffected > 0) {
                                 Alert.alert('Information', 'Data Berhasil di Simpan di Local')
@@ -440,7 +440,7 @@ const updateValueTableSubTask = (id_task, sub_task, keterangan, is_aktif, update
 const deleteValueTableSubTask = (id) => {
     db.transaction((tx) => {
         tx.executeSql(
-            'DELETE FROM table_task WHERE id=?',
+            'DELETE FROM table_sub_task WHERE id=?',
             [id],
             (tx, results) => {
                 // console.log('Results', results.rowsAffected);
