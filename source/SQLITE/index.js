@@ -32,7 +32,7 @@ const insertValueTableHistorySecurity = (barcode, nama, lat, lng, warna, gender,
             [barcode, nama, lat, lng, warna, gender, waktu],
             (tx, results) => {
                 if (results.rowsAffected > 0) {
-                    // console.log('Success upload history security');
+                    console.log('Success upload history security');
                 } else {
                     console.log('Failed upload history security');
                 }

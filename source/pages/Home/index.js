@@ -10,8 +10,8 @@ import BackgroundGeolocation from '@mauron85/react-native-background-geolocation
 import BackgroundTimer from 'react-native-background-timer';
 import { apiDataCheckPoint, apiLogout, apiPostHistoryLokasiSecurity, apiToken } from '../../API';
 import { deleteValueTableHistorySecurity, insertValueTableCheckpoint, insertValueTableHistorySecurity, insertValueTableSubTask, insertValueTableTask } from '../../SQLITE';
-import { openDatabase } from 'react-native-sqlite-storage';
 import Netinfo, { useNetInfo } from '@react-native-community/netinfo';
+import { openDatabase } from 'react-native-sqlite-storage';
 var db = openDatabase({ name: 'SatpamDatabase.db' });
 
 var sockectVariable = 'https://api2.sipatex.co.id:2053';
@@ -93,22 +93,15 @@ const Home = () => {
             days = day
         }
         var date = `${tahun}-${bulan}-${days} ${waktu}`;
-        Netinfo.addEventListener((state) => {
-            if (state.isConnected) {
-                insertValueTableHistorySecurity(barcode, nama, latitude, longitude, warna, gender, date);
-                socket.emit('test', {
-                    "barcode": barcode,
-                    "nama": nama,
-                    "lat": latitude,
-                    "lng": longitude,
-                    "warna": warna,
-                    "gender": gender,
-                    'waktu': date
-                })
-            } else {
-                insertValueTableHistorySecurity(barcode, nama, latitude, longitude, warna, gender, date);
-                // console.log('Signal offline');
-            }
+        insertValueTableHistorySecurity(barcode, nama, latitude, longitude, warna, gender, date);
+        socket.emit('test', {
+            "barcode": barcode,
+            "nama": nama,
+            "lat": latitude,
+            "lng": longitude,
+            "warna": warna,
+            "gender": gender,
+            'waktu': date
         })
     }
 
@@ -147,19 +140,24 @@ const Home = () => {
                                 body: JSON.stringify(data)
                             });
                             const json = await response.json();
-                            if (json) {
+                            if (json == 'Holding') {
+                                console.log('post online di holding');
+                            } else if (json.errors) {
+                                console.log(json.errors);
+
+                            } else if (json) {
                                 console.log(json);
                                 deleteValueTableHistorySecurity()
                             }
                         } catch (error) {
                             console.log('Error Post Online history : ', error);
-                            Alert.alert('Information Error Post Online', error)
+                            // Alert.alert('Information Error Post Online', error)
 
                         }
                     });
                 });
             } else {
-                console.log('Signal offline');
+                console.log('Signal post online offline');
             }
         })
 
@@ -335,7 +333,7 @@ const Home = () => {
         // return () => {
         //     AppState.removeEventListener('change', backgroundState)
         // }
-    }, [Netinfo]);
+    }, []);
 
     return (
         <Container>
@@ -356,6 +354,9 @@ const Home = () => {
                 </View>
                 <ScrollView>
                     <View style={{ margin: 8 }} >
+                        <Button onPress={()=> navigation.navigate('LokalSecurity') } >
+                            <Text>Ke lokal</Text>
+                        </Button>
                         <Text style={styles.font} >Information</Text>
                         {
                             role.length == 0 ?

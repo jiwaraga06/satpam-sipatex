@@ -6,6 +6,7 @@ import {
     Login,
     ChangePassword,
     Home,
+    LokalSecurity,
     AbsenSatpam,
     TabView,
     SplashScreen,
@@ -52,6 +53,7 @@ const Router = () => {
                 <Stack.Screen name="Datalokal" component={Datalokal} options={{ headerShown: false }} />
                 <Stack.Screen name="DatalokalTask" component={DatalokalTask} options={{ headerShown: false }} />
                 <Stack.Screen name="HistoryTransaksiAbsen" component={HistoryTransaksiAbsen} options={{ headerShown: false }} />
+                <Stack.Screen name="LokalSecurity" component={LokalSecurity} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     )
