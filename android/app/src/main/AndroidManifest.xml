@@ -13,8 +13,8 @@
       android:usesCleartextTraffic="true"
       android:name=".MainApplication"
       android:label="@string/app_name"
-      android:icon="@mipmap/ic_launcher"
-      android:roundIcon="@mipmap/ic_launcher_round"
+      android:icon="@mipmap/security2"
+      android:roundIcon="@mipmap/security2"
       android:allowBackup="false"
       android:theme="@style/AppTheme">
       <activity
@@ -32,7 +32,7 @@
         android:name="com.facebook.react.devsupport.DevSettingsActivity" />
       <meta-data
           android:name="com.google.android.geo.API_KEY"
-          android:value="AIzaSyBUfBS_jgFLUWEzOVVOc6IS9HJ1naWqo18"/>
+          android:value="AIzaSyAaiZNP1VkD1kJGUl2PeuA8lC197JmtogA"/>
 
         <meta-data  android:name="com.dieam.reactnativepushnotification.notification_foreground"
                     android:value="false"/>

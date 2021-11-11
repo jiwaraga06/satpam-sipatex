@@ -65,11 +65,19 @@ const Login = () => {
     useEffect(() => {
         const device = DeviceInfo.getUniqueId();
         console.log(device);
+        // const day = new Date().getDate();
+        // var days;
+        // if (day.toString().length < 2) {
+        //     days = `0${day}`
+        // } else {
+        //     days = day
+        // }
+        // console.log(days);
     }, []);
 
     return (
         <Container>
-            <View style={{ margin: 8}} >
+            <View style={{ margin: 8 }} >
                 <Item regular style={{ margin: 8 }} >
                     <MaterialCommunityIcons
                         name='account-box'
@@ -102,16 +110,16 @@ const Login = () => {
                     />
                     {
                         showPass == true ?
-                            <TouchableOpacity>
+                            <TouchableOpacity onPress={() => setshowPass(!showPass)} >
                                 <MaterialIcons
                                     name='visibility-off'
                                     size={25}
                                     color='black'
                                     style={{ marginRight: 8 }} />
                             </TouchableOpacity>
-                            : <TouchableOpacity>
+                            : <TouchableOpacity onPress={() => setshowPass(!showPass)} >
                                 <MaterialIcons
-                                    name='visibility-off'
+                                    name='visibility'
                                     size={25}
                                     color='black'
                                     style={{ marginRight: 8 }} />
@@ -128,6 +136,17 @@ const Login = () => {
                 <Button full style={styles.btnSubmit} onPress={() => postLogin()} >
                     <Text style={styles.btnFont} >Login</Text>
                 </Button>
+            </View>
+            <View style={{ flex: 1, justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
+                <View style={{ flexDirection: 'row', alignItems: "center" }} >
+                    <MaterialIcons
+                        name='copyright'
+                        size={23}
+                        color='black'
+                        style={{ marginRight: 8 }} />
+                    <Text style={{ fontSize: 19 }} >Copyright</Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: '700', marginTop: 8 }} >IT DEPARTEMENT | PT SIPATEX PUTRI LESTARI</Text>
             </View>
             {/* LOADING */}
             <Modal isVisible={isLoading} >

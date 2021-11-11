@@ -63,8 +63,8 @@ const AddCheckPointSubTask = ({ route }) => {
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        // NetInfo.addEventListener(async (state) => {
-            if (netinfo == true) {
+        NetInfo.addEventListener(async (state) => {
+            if (state.isConnected) {
 
                 setisLoading(true);
                 try {
@@ -102,7 +102,7 @@ const AddCheckPointSubTask = ({ route }) => {
                 }
                 insertValueTableSubTaskForm(id_task, listLocal.id_sub_task + 1, subTask, keterangan, date, date, isAktif)
             }
-        // })
+        })
     }
     useEffect(() => {
         NetInfo.addEventListener((state) => {
@@ -126,9 +126,12 @@ const AddCheckPointSubTask = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flexGrow: 2.5 }} >
-                    <Title>Tambah Sub Task CheckPoint</Title>
+                <Body style={{ flexGrow: 1.3 }} >
+                    <Title>Add Detail Task</Title>
                 </Body>
+                <Right style={{ flex: 0.5 }} >
+                    <View style={styles.signal(netinfo)} />
+                </Right>
             </Header>
             <View style={{ flex: 1 }} >
                 <ScrollView>
@@ -267,6 +270,14 @@ const AddCheckPointSubTask = ({ route }) => {
 export default AddCheckPointSubTask
 
 const styles = StyleSheet.create({
+    signal: (sinyal) => ({
+        backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
+        width: 25,
+        elevation: 6,
+        height: 25,
+        borderRadius: 4,
+        marginRight: 20
+    }),
     btnFont: {
         fontSize: 17,
         fontWeight: '700',

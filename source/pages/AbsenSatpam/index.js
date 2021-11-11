@@ -68,7 +68,7 @@ const AbsenSatpam = ({ route }) => {
                     "sub_task_id": index + 1,
                     "photo": "",
                     "checklist": "",
-                    "note": "-"
+                    "note": ""
                 }
                 settask((rev) => [...rev, data])
             }
@@ -79,7 +79,7 @@ const AbsenSatpam = ({ route }) => {
                 "sub_task_id": index + 1,
                 "photo": "",
                 "checklist": "",
-                "note": "-"
+                "note": ""
             }
             settaskLokal((rev) => [...rev, data])
         }
@@ -121,17 +121,53 @@ const AbsenSatpam = ({ route }) => {
         const waktu = new Date().toLocaleTimeString();
         const barcode = await AsyncStorage.getItem('barcode');
         var days;
-        if (day.toString().length <= 2) {
+        if (day.toString().length < 2) {
             days = `0${day}`
         } else {
             days = day
         }
         // setisLoading(true);
         Geolocation.getCurrentPosition(async (position) => {
-            // NetInfo.addEventListener(async (state) => {
-            if (netInfo == true) {
-                const data = {
-                    "data": [{
+            NetInfo.addEventListener(async (state) => {
+                if (state.isConnected) {
+                    const data = {
+                        "data": [{
+                            "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
+                            "barcode": barcode,
+                            "id_lokasi": id_lokasi,
+                            "lati": position.coords.latitude,
+                            "longi": position.coords.longitude,
+                            "id_sync": null,
+                            'tasks': task
+                        }]
+                    }
+                    console.log(data);
+                    try {
+                        const response = await fetch(apiTransaksiAbsen(), {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'Authorization': apiToken()
+                            },
+                            body: JSON.stringify(data)
+                        });
+                        const json = await response.json();
+                        console.log(json);
+                        if (json.errors) {
+                            setmessage(json.message);
+                            setisLoading(false)
+                        } else {
+                            setmessageSuccess(json.message);
+                            setisLoading(false)
+
+                        }
+                    } catch (error) {
+                        console.log('Error : ', error);
+                    }
+                } else {
+                    const data =
+                    {
                         "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
                         "barcode": barcode,
                         "id_lokasi": id_lokasi,
@@ -139,73 +175,38 @@ const AbsenSatpam = ({ route }) => {
                         "longi": position.coords.longitude,
                         "id_sync": null,
                         'tasks': task
-                    }]
-                }
-                try {
-                    const response = await fetch(apiTransaksiAbsen(), {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': apiToken()
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    const json = await response.json();
-                    console.log(json);
-                    if (json.errors) {
-                        setmessage(json.message);
-                        setisLoading(false)
-                    } else {
-                        setmessageSuccess(json.message);
-                        setisLoading(false)
-
                     }
-                } catch (error) {
-                    console.log('Error : ', error);
-                }
-            } else {
-                const data =
-                {
-                    "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
-                    "barcode": barcode,
-                    "id_lokasi": id_lokasi,
-                    "lati": position.coords.latitude,
-                    "longi": position.coords.longitude,
-                    "id_sync": null,
-                    'tasks': task
-                }
-                // dataLok.push(data)
-                setdataLok((rev) => [...rev, data])
-                console.log('DataLOk: ', dataLok);
-                AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
-                    .then(async (res) => {
-                        console.log('Res', res);
-                        if (res == undefined) {
-                            AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
-                            const DL = await AsyncStorage.getItem('lokalData')
-                            var par = JSON.parse(DL)
-                            console.log('INI DL: ', DL);
-                            if(par.length == 0){
-                                console.log('Ulangi');
-                                Alert.alert('Information', 'Klik Sekali lagi untuk simpan ke lokal')
-                            } else {
-                                console.log('sudah ada');
-                                // Alert.alert('Information', 'Data Sudah di simpan')
-                                setmessageSuccess('Berhasil Simpan Data Lokal')
-                            }
-                            // setisLoading(false)
-                            // setTimeout(async () => {
-                            //     AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
-                            //     const DL = await AsyncStorage.getItem('lokalData')
-                            //     console.log('INI DL Lokal: ', DL);
+                    // dataLok.push(data)
+                    setdataLok((rev) => [...rev, data])
+                    console.log('DataLOk: ', dataLok);
+                    AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                        .then(async (res) => {
+                            console.log('Res', res);
+                            if (res == undefined) {
+                                AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                                const DL = await AsyncStorage.getItem('lokalData')
+                                var par = JSON.parse(DL)
+                                console.log('INI DL: ', DL);
+                                if (par.length == 0) {
+                                    console.log('Ulangi');
+                                    Alert.alert('Information', 'Klik Sekali lagi untuk simpan ke lokal')
+                                } else {
+                                    console.log('sudah ada');
+                                    // Alert.alert('Information', 'Data Sudah di simpan')
+                                    setmessageSuccess('Berhasil Simpan Data Lokal')
+                                }
+                                // setisLoading(false)
+                                // setTimeout(async () => {
+                                //     AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                                //     const DL = await AsyncStorage.getItem('lokalData')
+                                //     console.log('INI DL Lokal: ', DL);
 
-                            // }, 1000);
-                        }
-                    })
-                    .catch((err) => console.log(err))
-            }
-            // })
+                                // }, 1000);
+                            }
+                        })
+                        .catch((err) => console.log(err))
+                }
+            })
 
             /////
         }, error => {
@@ -225,7 +226,7 @@ const AbsenSatpam = ({ route }) => {
             console.log("net: ", netInfo);
         })
         getDataSubTaskLokal()
-        add()
+        // add()
         getDataLocal()
     }, []);
 
@@ -338,12 +339,54 @@ const AbsenSatpam = ({ route }) => {
                     }
                 </ScrollView>
                 <View style={{ margin: 8 }} >
-                    <Button full style={styles.btnSubmit} onPress={() => {
-                        // console.log(task);
-                        postTransaksi()
-                    }} >
-                        <Text style={styles.btnFont} >Submit</Text>
-                    </Button>
+                    {
+                        netInfo == true ?
+                            sub_task == null ?
+                                <View />
+                                : task.length != sub_task.length ?
+                                    <Button full style={styles.btnKurang} onPress={() => { }} >
+                                        <Text style={styles.btnFont} >Data terisi {task.length} dari {sub_task.length}</Text>
+                                    </Button>
+                                    :
+                                    <Button full style={styles.btnSubmit} onPress={() => {
+                                        console.log(task);
+                                        Alert.alert('Information', 'Apakah Anda sudah Yakin ? ', [
+                                            {
+                                                text: 'Tidak'
+                                            },
+                                            {
+                                                text: 'Sudah',
+                                                onPress: () => {
+                                                    postTransaksi()
+                                                }
+                                            },
+                                        ])
+                                    }} >
+                                        <Text style={styles.btnFont} >Submit</Text>
+                                    </Button>
+                            :
+                            task.length != listLocal.length ?
+                                <Button full style={styles.btnKurang} onPress={() => { }} >
+                                    <Text style={styles.btnFont} >Data terisi {task.length} dari {listLocal.length}</Text>
+                                </Button>
+                                :
+                                <Button full style={styles.btnSubmit} onPress={() => {
+                                    console.log(task);
+                                    Alert.alert('Information', 'Apakah Anda sudah Yakin ? ', [
+                                        {
+                                            text: 'Tidak'
+                                        },
+                                        {
+                                            text: 'Sudah',
+                                            onPress: () => {
+                                                postTransaksi()
+                                            }
+                                        },
+                                    ])
+                                }} >
+                                    <Text style={styles.btnFont} >Submit</Text>
+                                </Button>
+                    }
                 </View>
             </View>
             <Modal isVisible={number != -1 ? true : false} >
@@ -388,6 +431,7 @@ const AbsenSatpam = ({ route }) => {
                         </View>
                         <View style={{ margin: 8 }} >
                             <Button full style={styles.btnSubmit} onPress={() => {
+
                                 if (!gambar) {
                                     Alert.alert('Alert', 'Gambar Harus di isi');
                                     return true;
@@ -402,21 +446,37 @@ const AbsenSatpam = ({ route }) => {
                                     setgambar('');
                                     setnote('');
                                     setcheck(false);
-                                    // settask(false);
                                     let temp_state = [...task];
-                                    let temp_state_lokal = [...taskLokal];
                                     let temp_element = { ...temp_state[number] };
-                                    let temp_element_lokal = { ...temp_state_lokal[number] };
-                                    temp_element.photo = photo;
-                                    temp_element_lokal.photo = photo;
-                                    temp_element.note = note;
-                                    temp_element_lokal.note = note;
-                                    temp_element.checklist = check;
-                                    temp_element_lokal.checklist = check;
-                                    temp_state[number] = temp_element;
-                                    temp_state_lokal[number] = temp_element_lokal;
-                                    settask(temp_state);
-                                    settaskLokal(temp_state_lokal)
+                                    console.log(temp_element.note);
+                                    if (temp_element != undefined) {
+                                        console.log('update');
+                                        let temp_state = [...task];
+                                        let temp_state_lokal = [...taskLokal];
+                                        let temp_element = { ...temp_state[number] };
+                                        let temp_element_lokal = { ...temp_state_lokal[number] };
+                                        temp_element.photo = photo;
+                                        temp_element_lokal.photo = photo;
+                                        temp_element.note = note;
+                                        temp_element_lokal.note = note;
+                                        temp_element.checklist = check;
+                                        temp_element_lokal.checklist = check;
+                                        temp_state[number] = temp_element;
+                                        temp_state_lokal[number] = temp_element_lokal;
+                                        settask(temp_state);
+                                        settaskLokal(temp_state_lokal)
+                                    } else {
+                                        console.log('isi');
+                                        const data = {
+                                            "sub_task_id": number + 1,
+                                            "photo": photo,
+                                            "checklist": check,
+                                            "note": note
+                                        }
+                                        settask((rev) => [...rev, data])
+                                    }
+                                    // settask(false);
+
                                 }
                             }} >
                                 <Text style={styles.btnFont} >Submit</Text>
@@ -507,6 +567,12 @@ const styles = StyleSheet.create({
         margin: 8,
         backgroundColor: is_aktif ? '#2e7d32' : '#c62828'
     }),
+    btnKurang: {
+        backgroundColor: 'grey',
+        borderRadius: 6,
+        elevation: 6,
+        margin: 8
+    },
     btnSubmit: {
         backgroundColor: '#2e7d32',
         borderRadius: 6,

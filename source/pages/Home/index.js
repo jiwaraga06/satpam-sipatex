@@ -64,6 +64,9 @@ const Home = () => {
             });
             const json = await response.json();
             if (json.message == 'Logout berhasil') {
+                BackgroundGeolocation.stop();
+                BackgroundGeolocation.removeAllListeners();
+                BackgroundGeolocation.deleteAllLocations();
                 AsyncStorage.removeItem('barcode');
                 AsyncStorage.removeItem('nama');
                 AsyncStorage.removeItem('warna');
@@ -84,10 +87,10 @@ const Home = () => {
         const gender = await AsyncStorage.getItem('gender');
         const tahun = new Date().getFullYear();
         const bulan = new Date().getMonth() + 1;
-        const day = new Date().getDate();
         const waktu = new Date().toLocaleTimeString();
+        const day = new Date().getDate();
         var days;
-        if (day.toString().length <= 2) {
+        if (day.toString().length < 2) {
             days = `0${day}`
         } else {
             days = day
@@ -168,8 +171,8 @@ const Home = () => {
             desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
             stationaryRadius: 50,
             distanceFilter: 0,
-            notificationTitle: 'Background tracking',
-            notificationText: 'enabled',
+            notificationTitle: 'Security',
+            notificationText: 'Security Tracking Location',
             debug: false,
             startOnBoot: false,
             stopOnTerminate: true,
@@ -256,7 +259,7 @@ const Home = () => {
                             e.updated_at,
                         )
                         e.sub_task.map((sb, id) => {
-                            console.log(sb);
+                            // console.log(sb);
                             insertValueTableSubTask(
                                 sb.id,
                                 sb.id_task,
@@ -295,6 +298,7 @@ const Home = () => {
                     })
                     socket.on('task_update', (task_update) => {
                         console.log('Listen Task Update Background', task_update);
+                        saveLocal()
                     })
                     socket.on('disconnect', () => {
                         console.log('socket disconnect background');
@@ -354,9 +358,9 @@ const Home = () => {
                 </View>
                 <ScrollView>
                     <View style={{ margin: 8 }} >
-                        <Button onPress={()=> navigation.navigate('LokalSecurity') } >
+                        {/* <Button onPress={()=> navigation.navigate('LokalSecurity') } >
                             <Text>Ke lokal</Text>
-                        </Button>
+                        </Button> */}
                         <Text style={styles.font} >Information</Text>
                         {
                             role.length == 0 ?

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { StyleSheet, View, TouchableOpacity, ScrollView, AsyncStorage } from 'react-native';
-import { Container, Text, Header, Title, Left, Body, Button, Spinner } from 'native-base';
+import { Container, Text, Header, Title, Left, Body, Button, Spinner, Right } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
+import NetInfo from '@react-native-community/netinfo'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { apiToken, apiTransaksiAbsen } from '../../API';
@@ -11,6 +12,7 @@ const Datalokal = () => {
     const navigation = useNavigation();
 
     const [isLoading, setisLoading] = useState(false);
+    const [netInfo, setnetInfo] = useState(false);
     const [list, setlist] = useState([]);
     const [message, setmessage] = useState('');
     const [messageSuccess, setmessageSuccess] = useState('');
@@ -21,7 +23,7 @@ const Datalokal = () => {
         const datalocal = await AsyncStorage.getItem('lokalData');
         parse = JSON.parse(datalocal);
         var parser = parse;
-        console.log('Lokal: ',parse);
+        console.log('Lokal: ', parse);
         // AsyncStorage.removeItem('datalocal');
         if (datalocal == null) {
             setisLoading(false);
@@ -69,13 +71,16 @@ const Datalokal = () => {
 
     useEffect(() => {
         getDataLocal()
+        NetInfo.addEventListener((state) => {
+            setnetInfo(state.isConnected)
+        })
         // AsyncStorage.setItem('lokalData', JSON.stringify([]))
     }, []);
 
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
-                <Left style={{ flexGrow: 1 }} >
+                <Left style={{ flex: 1 }} >
                     <TouchableOpacity onPress={() => navigation.goBack()} >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <MaterialIcons
@@ -87,9 +92,12 @@ const Datalokal = () => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flexGrow: 1.5 }} >
+                <Body style={{ flex: 1.1 }} >
                     <Title>Data Lokal</Title>
                 </Body>
+                <Right style={{ flex: 0.5 }} >
+                    <View style={styles.signal(netInfo)} />
+                </Right>
             </Header>
             <View style={{ flex: 1 }} >
                 <ScrollView
@@ -180,6 +188,14 @@ const Datalokal = () => {
 export default Datalokal
 
 const styles = StyleSheet.create({
+    signal: (sinyal) => ({
+        backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
+        width: 25,
+        elevation: 6,
+        height: 25,
+        borderRadius: 4,
+        marginRight: 20
+    }),
     card: {
         margin: 8,
         padding: 8,

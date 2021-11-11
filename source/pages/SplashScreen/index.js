@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { StyleSheet, Text, View, AsyncStorage } from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { Container, Spinner } from 'native-base';
 import { createTableCheckpoint, createTableHistorySecurity, createTableSubTask, createTableTask, deleteValueTableHistorySecurity } from '../../SQLITE';
 import { useNavigation } from '@react-navigation/native';
@@ -31,7 +32,7 @@ const SplashScreen = () => {
         createTableTask()
         createTableSubTask()
         setTimeout(() => {
-        createTableHistorySecurity()
+            createTableHistorySecurity()
             createTableCheckpoint()
             createTableTask()
             createTableSubTask()
@@ -70,11 +71,24 @@ const SplashScreen = () => {
     }, []);
     return (
         <View style={{ flex: 1, backgroundColor: '#252A34', justifyContent: 'center', alignItems: 'center' }} >
-            <MaterialCommunityIcons
-                name='security'
-                size={60}
-                color='white' />
-            <Spinner color='white' />
+            <View style={{ flex: 1, backgroundColor: '#252A34', justifyContent: 'center', alignItems: 'center' }} >
+                <MaterialCommunityIcons
+                    name='security'
+                    size={60}
+                    color='white' />
+                <Spinner color='white' />
+            </View>
+            <View style={{justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
+                <View style={{ flexDirection: 'row', alignItems: "center" }} >
+                    <MaterialIcons
+                        name='copyright'
+                        size={23}
+                        color='white'
+                        style={{ marginRight: 8 }} />
+                    <Text style={{ fontSize: 19 }} >Copyright</Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: '700', marginTop: 8 }} >IT DEPARTEMENT | PT SIPATEX PUTRI LESTARI</Text>
+            </View>
         </View>
     )
 }

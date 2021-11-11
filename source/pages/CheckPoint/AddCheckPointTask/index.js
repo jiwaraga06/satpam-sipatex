@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView, RefreshControl, Alert, AsyncStorage } from 'react-native';
-import { Container, Text, Header, Title, Left, Body, Button, Item, Input, Textarea, Spinner } from 'native-base';
+import { Container, Text, Header, Title, Left, Body, Button, Item, Input, Textarea, Spinner, Right } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Geolocation from 'react-native-geolocation-service';
 import { useNavigation } from '@react-navigation/native';
@@ -58,42 +58,42 @@ const AddCheckPointTask = ({ route }) => {
             'task': task,
             'user_creator': barcode
         }
-        // NetInfo.addEventListener(async (state) => {
-        if (netInfo == true) {
-            setisLoading(true);
-            try {
-                const response = await fetch(apiBikinTask(), {
-                    method: 'POST',
-                    headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                        'Authorization': apiToken()
-                    },
-                    body: JSON.stringify(data)
-                });
-                const json = await response.json();
-                console.log(json);
-                if (json.errors) {
-                    setisLoading(false);
-                    setmessage(json.message);
-                    seterrtask(json.errors.task);
-                } else {
-                    setisLoading(false);
-                    setmessagesuccess(json);
-                    // navigation.goBack();
+        NetInfo.addEventListener(async (state) => {
+            if (state.isConnected) {
+                setisLoading(true);
+                try {
+                    const response = await fetch(apiBikinTask(), {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'Authorization': apiToken()
+                        },
+                        body: JSON.stringify(data)
+                    });
+                    const json = await response.json();
+                    console.log(json);
+                    if (json.errors) {
+                        setisLoading(false);
+                        setmessage(json.message);
+                        seterrtask(json.errors.task);
+                    } else {
+                        setisLoading(false);
+                        setmessagesuccess(json);
+                        // navigation.goBack();
+                    }
+                } catch (error) {
+                    console.log('Error Tambah Checkpoint : ', error);
+                    Alert.alert('information', error)
                 }
-            } catch (error) {
-                console.log('Error Tambah Checkpoint : ', error);
-                Alert.alert('information', error)
+            } else {
+                if (!task) {
+                    seterrtask('Task Harus di Isi')
+                    return true;
+                }
+                insertValueTableTaskForm(id_lokasi, listLocal.id_task + 1, task, barcode, date, date)
             }
-        } else {
-            if (!task) {
-                seterrtask('Task Harus di Isi')
-                return true;
-            }
-            insertValueTableTaskForm(id_lokasi, listLocal.id_task + 1, task, barcode, date, date)
-        }
-        // })
+        })
 
     }
     useEffect(() => {
@@ -117,9 +117,12 @@ const AddCheckPointTask = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flexGrow: 2.1 }} >
-                    <Title>Tambah Task CheckPoint</Title>
+                <Body style={{ flexGrow: 1.5 }} >
+                    <Title>Tambah Task</Title>
                 </Body>
+                <Right style={{ flex: 0.1 }} >
+                    <View style={styles.signal(netInfo)} />
+                </Right>
             </Header>
             <View style={{ flex: 1 }} >
                 <ScrollView>
@@ -193,6 +196,14 @@ const AddCheckPointTask = ({ route }) => {
 export default AddCheckPointTask
 
 const styles = StyleSheet.create({
+    signal: (sinyal) => ({
+        backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
+        width: 25,
+        elevation: 6,
+        height: 25,
+        borderRadius: 4,
+        marginRight: 20
+    }),
     btnFont: {
         fontSize: 17,
         fontWeight: '700',

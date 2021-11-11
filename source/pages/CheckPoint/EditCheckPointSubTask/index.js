@@ -43,8 +43,8 @@ const EditCheckPointSubTask = ({ route }) => {
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        // NetInfo.addEventListener(async (state) => {
-            if (netInfo == true) {
+        NetInfo.addEventListener(async (state) => {
+            if (state.isConnected) {
                 setisLoading(true);
                 try {
                     const response = await fetch(apiUpdateSubTask(), {
@@ -81,7 +81,7 @@ const EditCheckPointSubTask = ({ route }) => {
                 }
                 updateValueTableSubTask(id_task, subTask, keterangan, isAktif, date, id)
             }
-        // })
+        })
     }
     useEffect(() => {
         setsubTask(sub_task);
@@ -94,7 +94,7 @@ const EditCheckPointSubTask = ({ route }) => {
     return (
         <Container>
             <Header androidStatusBarColor='#252A34' style={{ backgroundColor: '#252A34' }} >
-                <Left style={{ flexGrow: 1 }} >
+                <Left style={{ flex: 1 }} >
                     <TouchableOpacity onPress={() => navigation.goBack()} >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <MaterialIcons
@@ -106,9 +106,12 @@ const EditCheckPointSubTask = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flexGrow: 2.5 }} >
-                    <Title>Tambah Sub Task CheckPoint</Title>
+                <Body style={{ flexGrow: 1.3 }} >
+                    <Title>Edit Detail Task</Title>
                 </Body>
+                <Right style={{ flex: 0.5 }} >
+                    <View style={styles.signal(netInfo)} />
+                </Right>
             </Header>
             <View style={{ flex: 1 }} >
                 <ScrollView>
@@ -249,6 +252,14 @@ const EditCheckPointSubTask = ({ route }) => {
 export default EditCheckPointSubTask
 
 const styles = StyleSheet.create({
+    signal: (sinyal) => ({
+        backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
+        width: 25,
+        elevation: 6,
+        height: 25,
+        borderRadius: 4,
+        marginRight: 20
+    }),
     btnFont: {
         fontSize: 17,
         fontWeight: '700',

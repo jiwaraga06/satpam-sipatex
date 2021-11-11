@@ -87,8 +87,8 @@ const CheckPointSubTask = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flex: 1.8 }} >
-                    <Title>Sub Task CheckPoint</Title>
+                <Body style={{ flex: 1 }} >
+                    <Title>Detail Task</Title>
                 </Body>
                 <Right style={{ flex: 0.5 }} >
                     <View style={styles.signal(netInfo)} />
@@ -190,7 +190,7 @@ const CheckPointSubTask = ({ route }) => {
                                                     is_aktif: item.is_aktif
                                                 })
                                             }} >
-                                                <Text style={styles.btnFont} >Ubah Sub Task</Text>
+                                                <Text style={styles.btnFont} >Ubah Detail Task</Text>
                                             </Button>
                                         </View>
                                     </View>
@@ -201,7 +201,7 @@ const CheckPointSubTask = ({ route }) => {
                     <Button full style={styles.btnTambah} onPress={() => navigation.navigate('AddCheckPointSubTask', {
                         id_task: id_task
                     })} >
-                        <Text style={styles.btnFont} >Tambah SUb Task Checkpoint</Text>
+                        <Text style={styles.btnFont} >Tambah Detail Task</Text>
                     </Button>
                 </View>
             </View>

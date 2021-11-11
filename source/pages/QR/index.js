@@ -83,7 +83,7 @@ const ScanQR = () => {
       { latitude: latitude, longitude: longitude },
     );
     console.log('Jarak : ', distance);
-    if (distance <= 10) {
+    if (distance <= 2) {
       setTimeout(() => {
         setsubmit(true);
         setisLoading(false);
@@ -111,13 +111,13 @@ const ScanQR = () => {
         });
         const json = await response.json();
         console.log(json);
-        if (json.errors) {
-          setmessage(json.errors.id_lokasi)
-          setisLoading(false);
-          Alert.alert('Information', json.errors.id_lokasi)
-        } else {
-          setisLoading(false);
+        if (json.errors == null) {
           setlist(json)
+          setisLoading(false);
+        } else if (json.errors) {
+          // setmessage(json.errors.id_lokasi)
+          setisLoading(false);
+          Alert.alert('Information', `${json.errors.id_lokasi}`)
         }
       } catch (error) {
         console.log('Error : ', error);
@@ -265,7 +265,7 @@ const ScanQR = () => {
                         <Text style={{ fontSize: 17, color: 'black' }} >{item.task}</Text>
                         <View>
                           <Button full style={styles.btnSubTas} onPress={() => navigation.navigate('AbsenSatpam', {
-                            sub_task: item.sub_task,
+                            sub_task: [],
                             id_task: item.id_task,
                             id_lokasi: item.id_lokasi
                           })} >

@@ -60,8 +60,8 @@ const CheckPointTask = ({ route }) => {
                         </View>
                     </TouchableOpacity>
                 </Left>
-                <Body style={{ flex: 1.8 }} >
-                    <Title>Task CheckPoint</Title>
+                <Body style={{ flex: 1.1 }} >
+                    <Title>Task</Title>
                 </Body>
                 <Right style={{ flex: 0.1 }} >
                     <View style={styles.signal(netInfo)} />
@@ -101,7 +101,7 @@ const CheckPointTask = ({ route }) => {
                                                     id_task: item.id
                                                 })
                                             }} >
-                                                <Text style={styles.btnFont} >Lihat Sub Task</Text>
+                                                <Text style={styles.btnFont} >Lihat Detail Task</Text>
                                             </Button>
                                         </View>
                                     </View>
@@ -144,7 +144,7 @@ const CheckPointTask = ({ route }) => {
                     <Button full style={styles.btnTambah} onPress={() => navigation.navigate('AddCheckPointTask', {
                         id_lokasi: id_lokasi
                     })} >
-                        <Text style={styles.btnFont} >Tambah Task Checkpoint</Text>
+                        <Text style={styles.btnFont} >Tambah Task</Text>
                     </Button>
                 </View>
             </View>

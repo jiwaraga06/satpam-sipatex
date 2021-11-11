@@ -96,14 +96,14 @@ const ChangePassword = () => {
                     />
                     {
                         showPass == true ?
-                            <TouchableOpacity onPress={() => setshowPass(!showPass)} >
+                            <TouchableOpacity onPress={() => setshowPass(false)} >
                                 <MaterialIcons
                                     name='visibility-off'
                                     size={25}
                                     color='black'
                                     style={{ marginRight: 8 }} />
                             </TouchableOpacity>
-                            : <TouchableOpacity onPress={() => setshowPass(!showPass)} >
+                            : <TouchableOpacity onPress={() => setshowPass(true)} >
                                 <MaterialIcons
                                     name='visibility'
                                     size={25}
@@ -157,6 +157,17 @@ const ChangePassword = () => {
                 <Button full style={styles.btnSubmit} onPress={() => postChangePassword()} >
                     <Text style={styles.btnFont} >Change Password</Text>
                 </Button>
+            </View>
+            <View style={{ flex: 1, justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
+                <View style={{ flexDirection: 'row', alignItems: "center" }} >
+                    <MaterialIcons
+                        name='copyright'
+                        size={23}
+                        color='black'
+                        style={{ marginRight: 8 }} />
+                    <Text style={{ fontSize: 19 }} >Copyright</Text>
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: '700', marginTop: 8 }} >IT DEPARTEMENT | PT SIPATEX PUTRI LESTARI</Text>
             </View>
             {/* LOADING */}
             <Modal isVisible={isLoading} >
