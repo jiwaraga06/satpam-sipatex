@@ -58,8 +58,8 @@ const AddCheckPointTask = ({ route }) => {
             'task': task,
             'user_creator': barcode
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
+        // NetInfo.addEventListener(async (state) => {
+            if (netInfo) {
                 setisLoading(true);
                 try {
                     const response = await fetch(apiBikinTask(), {
@@ -93,7 +93,7 @@ const AddCheckPointTask = ({ route }) => {
                 }
                 insertValueTableTaskForm(id_lokasi, listLocal.id_task + 1, task, barcode, date, date)
             }
-        })
+        // })
 
     }
     useEffect(() => {

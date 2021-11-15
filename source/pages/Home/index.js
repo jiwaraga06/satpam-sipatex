@@ -285,7 +285,6 @@ const Home = () => {
         ) {
             console.log("App has come to the foreground!");
         }
-
         appState.current = nextAppState;
         setAppStateVisible(appState.current);
         console.log("AppState :", appState.current);
@@ -307,6 +306,7 @@ const Home = () => {
             })
         }
     }
+
     var intervalSaveLokal;
 
     useEffect(() => {

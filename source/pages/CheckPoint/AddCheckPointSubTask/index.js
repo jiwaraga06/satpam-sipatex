@@ -63,8 +63,8 @@ const AddCheckPointSubTask = ({ route }) => {
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
+        // NetInfo.addEventListener(async (state) => {
+            if (netinfo) {
 
                 setisLoading(true);
                 try {
@@ -102,7 +102,7 @@ const AddCheckPointSubTask = ({ route }) => {
                 }
                 insertValueTableSubTaskForm(id_task, listLocal.id_sub_task + 1, subTask, keterangan, date, date, isAktif)
             }
-        })
+        // })
     }
     useEffect(() => {
         NetInfo.addEventListener((state) => {

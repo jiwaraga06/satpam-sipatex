@@ -39,44 +39,44 @@ const EditCheckPointTask = ({ route }) => {
             'task': task,
             'user_creator': barcode
         }
-        Netinfo.addEventListener(async (state) => {
-            if (state.isConnected) {
+        // Netinfo.addEventListener(async (state) => {
+        if (netInfo) {
 
-                setisLoading(true);
-                try {
-                    const response = await fetch(apiUpdateTask(), {
-                        method: 'PUT',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': apiToken()
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    const json = await response.json();
-                    console.log(json);
-                    if (json.errors) {
-                        setisLoading(false);
-                        setmessage(json.message);
-                        seterrtask(json.errors.task);
-                    } else {
-                        setisLoading(false);
-                        setmessagesuccess(json);
-                        // navigation.goBack();
-                    }
-                } catch (error) {
-                    console.log('Error Tambah Checkpoint : ', error);
-                    Alert.alert('information', error)
+            setisLoading(true);
+            try {
+                const response = await fetch(apiUpdateTask(), {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                console.log(json);
+                if (json.errors) {
+                    setisLoading(false);
+                    setmessage(json.message);
+                    seterrtask(json.errors.task);
+                } else {
+                    setisLoading(false);
+                    setmessagesuccess(json);
+                    // navigation.goBack();
                 }
-            } else {
-
-                if (!task) {
-                    seterrtask('Task Harus di Isi');
-                    return true;
-                }
-                updateValueTableTask(id_lokasi, task, barcode, date, id);
+            } catch (error) {
+                console.log('Error Tambah Checkpoint : ', error);
+                Alert.alert('information', error)
             }
-        })
+        } else {
+
+            if (!task) {
+                seterrtask('Task Harus di Isi');
+                return true;
+            }
+            updateValueTableTask(id_lokasi, task, barcode, date, id);
+        }
+        // })
 
     }
     useEffect(() => {

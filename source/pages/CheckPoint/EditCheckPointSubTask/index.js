@@ -43,45 +43,45 @@ const EditCheckPointSubTask = ({ route }) => {
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
-                setisLoading(true);
-                try {
-                    const response = await fetch(apiUpdateSubTask(), {
-                        method: 'Put',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': apiToken()
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    const json = await response.json();
-                    console.log(json);
-                    if (json.errors) {
-                        setisLoading(false);
-                        setmessage(json.message);
-                        seterrsubTask(json.errors.sub_task);
-                        seterrKet(json.errors.keterangan);
-                        seterrisAktif(json.errors.is_aktif);
-                    } else {
-                        setisLoading(false);
-                        setmessagesuccess(json);
-                        // navigation.goBack();
-                    }
-                } catch (error) {
-                    console.log('Error Update Checkpoint : ', error);
-                    Alert.alert('information', error)
+        // NetInfo.addEventListener(async (state) => {
+        if (netInfo) {
+            setisLoading(true);
+            try {
+                const response = await fetch(apiUpdateSubTask(), {
+                    method: 'Put',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                console.log(json);
+                if (json.errors) {
+                    setisLoading(false);
+                    setmessage(json.message);
+                    seterrsubTask(json.errors.sub_task);
+                    seterrKet(json.errors.keterangan);
+                    seterrisAktif(json.errors.is_aktif);
+                } else {
+                    setisLoading(false);
+                    setmessagesuccess(json);
+                    // navigation.goBack();
                 }
-            } else {
-                if (!subTask && !keterangan) {
-                    seterrKet('Keterangan Harus di isi');
-                    setsubTask('Sub task harus di isi');
-                    return true;
-                }
-                updateValueTableSubTask(id_task, subTask, keterangan, isAktif, date, id)
+            } catch (error) {
+                console.log('Error Update Checkpoint : ', error);
+                Alert.alert('information', error)
             }
-        })
+        } else {
+            if (!subTask && !keterangan) {
+                seterrKet('Keterangan Harus di isi');
+                setsubTask('Sub task harus di isi');
+                return true;
+            }
+            updateValueTableSubTask(id_task, subTask, keterangan, isAktif, date, id)
+        }
+        // })
     }
     useEffect(() => {
         setsubTask(sub_task);

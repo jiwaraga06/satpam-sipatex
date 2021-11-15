@@ -70,44 +70,44 @@ const AddCheckPoint = ({ route }) => {
             'keterangan': keterangan,
             'user_creator': barcode
         }
-        NetInfo.addEventListener(async (state) => {
-            if (state.isConnected) {
-                setisLoading(true);
-                try {
-                    const response = await fetch(apiSimpanCheckPoint(), {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
-                            'Authorization': apiToken()
-                        },
-                        body: JSON.stringify(data)
-                    });
-                    const json = await response.json();
-                    // console.log(json);
-                    if (json.errors) {
-                        setisLoading(false);
-                        setmessage(json.message);
-                        seterrKet(json.errors.keterangan);
-                        seterrNamaLok(json.errors.nama_lokasi);
-                    } else {
-                        setisLoading(false);
-                        setmessagesuccess(json);
-                        // navigation.goBack();
-                    }
-                } catch (error) {
-                    console.log('Error Tambah Checkpoint : ', error);
-                    Alert.alert('information', error)
+        // NetInfo.addEventListener(async (state) => {
+        if (netInfo) {
+            setisLoading(true);
+            try {
+                const response = await fetch(apiSimpanCheckPoint(), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                // console.log(json);
+                if (json.errors) {
+                    setisLoading(false);
+                    setmessage(json.message);
+                    seterrKet(json.errors.keterangan);
+                    seterrNamaLok(json.errors.nama_lokasi);
+                } else {
+                    setisLoading(false);
+                    setmessagesuccess(json);
+                    // navigation.goBack();
                 }
-            } else {
-                if (!nama_lokasi && !keterangan) {
-                    seterrNamaLok('Nama Lokasi Tidak Boleh Kosong')
-                    seterrKet('Keterangan Tidak Boleh Kosong')
-                    return true;
-                }
-                insertValueTableCheckpointForm(id_checkpoint, nama_lokasi, currentPosition.latitude, currentPosition.longitude, keterangan, date, date, barcode);
+            } catch (error) {
+                console.log('Error Tambah Checkpoint : ', error);
+                Alert.alert('information', error)
             }
-        })
+        } else {
+            if (!nama_lokasi && !keterangan) {
+                seterrNamaLok('Nama Lokasi Tidak Boleh Kosong')
+                seterrKet('Keterangan Tidak Boleh Kosong')
+                return true;
+            }
+            insertValueTableCheckpointForm(id_checkpoint, nama_lokasi, currentPosition.latitude, currentPosition.longitude, keterangan, date, date, barcode);
+        }
+        // })
 
     }
     useEffect(() => {

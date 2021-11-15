@@ -23,6 +23,7 @@ const AbsenSatpam = ({ route }) => {
     const [listLocal, setlistLocal] = useState([]);
     const [dataLok, setdataLok] = useState([]);
     const [number, setnumber] = useState(-1);
+    const [inActive, setinActive] = useState(0);
     const [task, settask] = useState([]);
     const [taskLokal, settaskLokal] = useState([]);
     const [note, setnote] = useState('');
@@ -31,6 +32,9 @@ const AbsenSatpam = ({ route }) => {
     const [check, setcheck] = useState(false);
     const [message, setmessage] = useState('');
     const [messageSuccess, setmessageSuccess] = useState('');
+
+    const [jumlah, setjumlah] = useState(0);
+    const [jumlahLokal, setjumlahLokal] = useState(0);
 
     const openKamera = () => {
         ImagePicker.openCamera({
@@ -50,14 +54,55 @@ const AbsenSatpam = ({ route }) => {
         db.transaction((tx) => {
             tx.executeSql('SELECT * FROM table_sub_task WHERE id_task=?', [id_task], (tx, results) => {
                 var temp = [];
+                var mati;
+                var a = 0;
                 // console.log('ress ',results.rowsAffected);
                 for (let i = 0; i < results.rows.length; ++i)
                     temp.push(results.rows.item(i));
-                console.log('Dari Lokal', temp);
+                // console.log('Dari Lokal', temp);
+                temp.map((e) => {
+                    console.log(e.is_aktif);
+                    if (e.is_aktif == 0) {
+                        console.log('mati');
+                        setinActive(inActive + 1)
+                        a = a + 1;
+                        // mati + 1;
+                    } else {
+                        console.log('hidup');
+
+                    }
+                })
                 setisLoading(false)
                 setlistLocal(temp)
+                console.log('Log: ', temp.length - a);
+                mati = temp.length - a;
+                console.log(a);
+                console.log('mati: ', mati);
+                setjumlah(mati)
+                // console.log('Jumlah: ', jumlah);
             });
         });
+    }
+    const getSubtask = () => {
+        var a = 0;
+        var mati;
+        sub_task.map((e) => {
+            console.log(e.is_aktif);
+            if (e.is_aktif == 0) {
+                console.log('mati');
+                setinActive(inActive + 1)
+                a = a + 1;
+                // mati + 1;
+            } else {
+                console.log('hidup');
+
+            }
+        })
+        console.log('Log Online: ', sub_task.length - a);
+        mati = sub_task.length - a;
+        console.log(a);
+        console.log('mati: ', mati);
+        setjumlah(mati)
     }
 
     var list = [];
@@ -224,10 +269,15 @@ const AbsenSatpam = ({ route }) => {
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
             console.log("net: ", netInfo);
+            if(state.isConnected) {
+                getSubtask()
+            } else {
+                getDataSubTaskLokal()
+            }
         })
-        getDataSubTaskLokal()
-        // add()
         getDataLocal()
+        // console.log(inActive);
+        // add()
     }, []);
 
     return (
@@ -343,9 +393,9 @@ const AbsenSatpam = ({ route }) => {
                         netInfo == true ?
                             sub_task == null ?
                                 <View />
-                                : task.length != sub_task.length ?
+                                : task.length != jumlah ?
                                     <Button full style={styles.btnKurang} onPress={() => { }} >
-                                        <Text style={styles.btnFont} >Data terisi {task.length} dari {sub_task.length}</Text>
+                                        <Text style={styles.btnFont} >Data terisi {task.length} dari {jumlah}</Text>
                                     </Button>
                                     :
                                     <Button full style={styles.btnSubmit} onPress={() => {
@@ -365,9 +415,9 @@ const AbsenSatpam = ({ route }) => {
                                         <Text style={styles.btnFont} >Submit</Text>
                                     </Button>
                             :
-                            task.length != listLocal.length ?
+                            task.length != jumlah ?
                                 <Button full style={styles.btnKurang} onPress={() => { }} >
-                                    <Text style={styles.btnFont} >Data terisi {task.length} dari {listLocal.length}</Text>
+                                    <Text style={styles.btnFont} >Data terisi {task.length} dari {jumlah}</Text>
                                 </Button>
                                 :
                                 <Button full style={styles.btnSubmit} onPress={() => {
