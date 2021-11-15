@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StatusBar, StyleSheet, View, PermissionsAndroid, AsyncStorage } from 'react-native';
+import { StatusBar, StyleSheet, View, PermissionsAndroid, AsyncStorage, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import { Container, Text, Tab, Tabs, TabHeading } from 'native-base';
@@ -63,10 +63,10 @@ const TabView = () => {
         <Container style={{ backgroundColor: '#252A34' }} >
             <StatusBar backgroundColor='#252A34' />
             <View style={{ height: 200, justifyContent: 'center', alignItems: 'center' }} >
-                <MaterialCommunityIcons
-                    name='security'
-                    size={60}
-                    color='white' />
+                <Image
+                    source={require('../../Img/security3.jpg')}
+                    style={{ width: 120, height: 120, marginTop: 12, resizeMode: 'contain' }}
+                />
                 <Text style={{ color: 'white', fontSize: 25, marginTop: 10, marginBottom: 8, fontWeight: '700' }} >Security</Text>
             </View>
             <View style={{ flex: 1, margin: 8 }} >

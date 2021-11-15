@@ -43,12 +43,22 @@ const Login = () => {
                 setisLoading(false);
                 setmessage(json.message)
             }
+            else if (json.data == 'User tidak ditemukan') {
+                setmessage(json.message);
+                setisLoading(false);
+            }
+            else if (json.data == 'Password salah') {
+                setmessage(json.message);
+                seterrPassword(json.message);
+                setisLoading(false);
+            }
             else if (json.errors) {
                 setmessage(json.message);
                 seterrBarcode(json.errors.barcode);
                 seterrPassword(json.errors.password);
                 setisLoading(false);
-            } else {
+            }
+            else if (json.message == 'Berhasil login') {
                 setisLoading(false);
                 AsyncStorage.setItem('barcode', json.data.barcode);
                 AsyncStorage.setItem('nama', json.data.nama);

@@ -363,12 +363,18 @@ const CheckPoint = () => {
                         }
                     </Button>
                     <Button full style={styles.btnTambah} onPress={() => {
-                        listLocal.map((item, index) => {
+                        if (listLocal.length == 0) {
                             navigation.navigate('AddCheckPoint', {
-                                id_checkpoint: item.id_checkpoint
+                                id_checkpoint: 0
                             })
-                            console.log(item.id_checkpoint);
-                        })
+                        } else {
+                            listLocal.map((item, index) => {
+                                navigation.navigate('AddCheckPoint', {
+                                    id_checkpoint: item.id_checkpoint
+                                })
+                                console.log(item.id_checkpoint);
+                            })
+                        }
                     }} >
                         <Text style={styles.btnFont} >Tambah Checkpoint</Text>
                     </Button>

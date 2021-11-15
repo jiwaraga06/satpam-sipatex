@@ -269,7 +269,7 @@ const AbsenSatpam = ({ route }) => {
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
             console.log("net: ", netInfo);
-            if(state.isConnected) {
+            if (state.isConnected) {
                 getSubtask()
             } else {
                 getDataSubTaskLokal()
@@ -400,6 +400,7 @@ const AbsenSatpam = ({ route }) => {
                                     :
                                     <Button full style={styles.btnSubmit} onPress={() => {
                                         console.log(task);
+
                                         Alert.alert('Information', 'Apakah Anda sudah Yakin ? ', [
                                             {
                                                 text: 'Tidak'
@@ -505,6 +506,8 @@ const AbsenSatpam = ({ route }) => {
                                         let temp_state_lokal = [...taskLokal];
                                         let temp_element = { ...temp_state[number] };
                                         let temp_element_lokal = { ...temp_state_lokal[number] };
+                                        temp_element.sub_task_id = number + 1;
+                                        temp_element_lokal.sub_task_id = number + 1;
                                         temp_element.photo = photo;
                                         temp_element_lokal.photo = photo;
                                         temp_element.note = note;
@@ -519,7 +522,7 @@ const AbsenSatpam = ({ route }) => {
                                         console.log('isi');
                                         const data = {
                                             "sub_task_id": number + 1,
-                                            "photo": photo,
+                                            "photo": "",
                                             "checklist": check,
                                             "note": note
                                         }

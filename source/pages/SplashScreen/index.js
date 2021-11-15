@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
-import { StyleSheet, Text, View, AsyncStorage } from 'react-native'
+import { StyleSheet, Text, View, AsyncStorage, Image } from 'react-native'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import { Container, Spinner } from 'native-base';
+import Logo from '../../Img/security3.jpg'
 import { createTableCheckpoint, createTableHistorySecurity, createTableSubTask, createTableTask, deleteValueTableHistorySecurity } from '../../SQLITE';
 import { useNavigation } from '@react-navigation/native';
 import { openDatabase } from 'react-native-sqlite-storage';
@@ -72,13 +73,17 @@ const SplashScreen = () => {
     return (
         <View style={{ flex: 1, backgroundColor: '#252A34', justifyContent: 'center', alignItems: 'center' }} >
             <View style={{ flex: 1, backgroundColor: '#252A34', justifyContent: 'center', alignItems: 'center' }} >
-                <MaterialCommunityIcons
+                <Image
+                    source={require('../../Img/security3.jpg')}
+                    style={{ width: 150, height: 150 , resizeMode: 'contain'}}
+                />
+                {/* <MaterialCommunityIcons
                     name='security'
                     size={60}
-                    color='white' />
+                    color='white' /> */}
                 <Spinner color='white' />
             </View>
-            <View style={{justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
+            <View style={{ justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
                 <View style={{ flexDirection: 'row', alignItems: "center" }} >
                     <MaterialIcons
                         name='copyright'

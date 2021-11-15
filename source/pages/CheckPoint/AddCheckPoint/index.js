@@ -140,6 +140,9 @@ const AddCheckPoint = ({ route }) => {
                 </Right>
             </Header>
             <View style={{ flex: 1 }} >
+                {/* <View style={{ justifyContent: 'center', alignItems: 'center' }} >
+                    <Text>Tester</Text>
+                </View> */}
                 <ScrollView>
                     <View style={styles.container}>
                         {
