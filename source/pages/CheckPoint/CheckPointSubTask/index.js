@@ -104,7 +104,7 @@ const CheckPointSubTask = ({ route }) => {
                         netInfo == true ?
                             sub_task.length == 0 ?
                                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-                                    <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Local Kosong</Text>
+                                    <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Kosong</Text>
                                 </View>
                                 :
                                 sub_task.map((item, index) => {

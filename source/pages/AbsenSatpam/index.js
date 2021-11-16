@@ -349,43 +349,48 @@ const AbsenSatpam = ({ route }) => {
                                         }
                                     </View>
                                 })
-                            : listLocal.map((item, index) => {
-                                return <View key={index} style={styles.card} >
-                                    <View style={{ margin: 8 }} >
-                                        <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.sub_task}</Text>
-                                    </View>
-                                    <View style={styles.isActive(item.is_aktif)} >
+                            : listLocal.length == 0 ?
+                                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                                    <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Kosong</Text>
+                                </View>
+                                :
+                                listLocal.map((item, index) => {
+                                    return <View key={index} style={styles.card} >
+                                        <View style={{ margin: 8 }} >
+                                            <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.sub_task}</Text>
+                                        </View>
+                                        <View style={styles.isActive(item.is_aktif)} >
+                                            {
+                                                item.is_aktif == 1 ?
+                                                    <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                        <FontAwesome
+                                                            name='check-circle'
+                                                            size={30}
+                                                            color='white'
+                                                            style={{ marginRight: 8 }} />
+                                                        <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >Active</Text>
+                                                    </View>
+                                                    : <View style={{ flexDirection: 'row', alignItems: 'center' }} >
+                                                        <FontAwesome
+                                                            name='close'
+                                                            size={30}
+                                                            color='white'
+                                                            style={{ marginRight: 8 }} />
+                                                        <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >In Active</Text>
+                                                    </View>
+                                            }
+                                        </View>
                                         {
                                             item.is_aktif == 1 ?
-                                                <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-                                                    <FontAwesome
-                                                        name='check-circle'
-                                                        size={30}
-                                                        color='white'
-                                                        style={{ marginRight: 8 }} />
-                                                    <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >Active</Text>
+                                                <View style={{ margin: 8 }} >
+                                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                                        <Text style={styles.btnFont} >Isi Task</Text>
+                                                    </Button>
                                                 </View>
-                                                : <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-                                                    <FontAwesome
-                                                        name='close'
-                                                        size={30}
-                                                        color='white'
-                                                        style={{ marginRight: 8 }} />
-                                                    <Text style={{ fontSize: 17, fontWeight: '700', color: 'white' }} >In Active</Text>
-                                                </View>
+                                                : <View />
                                         }
                                     </View>
-                                    {
-                                        item.is_aktif == 1 ?
-                                            <View style={{ margin: 8 }} >
-                                                <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
-                                                    <Text style={styles.btnFont} >Isi Task</Text>
-                                                </Button>
-                                            </View>
-                                            : <View />
-                                    }
-                                </View>
-                            })
+                                })
                     }
                 </ScrollView>
                 <View style={{ margin: 8 }} >

@@ -8,7 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 import BackgroundTimer from 'react-native-background-timer';
-import { apiDataCheckPoint, apiLogout, apiPostHistoryLokasiSecurity, apiToken } from '../../API';
+import { apiDataCheckPoint, apiLogout, apiPostHistoryLokasiSecurity, apiRadius, apiToken } from '../../API';
 import { deleteValueTableHistorySecurity, insertValueTableCheckpoint, insertValueTableHistorySecurity, insertValueTableSubTask, insertValueTableTask } from '../../SQLITE';
 import Netinfo, { useNetInfo } from '@react-native-community/netinfo';
 import { openDatabase } from 'react-native-sqlite-storage';
@@ -308,6 +308,23 @@ const Home = () => {
     }
 
     var intervalSaveLokal;
+    const getRadius = async () => {
+        try {
+            const response = await fetch(apiRadius(), {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': apiToken()
+                }
+            });
+            const json = await response.json();
+            console.log('Radius: ', json);
+            AsyncStorage.setItem('radius', `${json.radius}`)
+        } catch (error) {
+            console.log('Error radius: ', error);
+            Alert.alert('Information Radius', error);
+        }
+    }
 
     useEffect(() => {
         const socket = io.connect(sockectVariable);
@@ -321,7 +338,8 @@ const Home = () => {
         socket.on('disconnect', () => {
             console.log('socket disconnect');
         })
-        saveLocal()
+        getRadius();
+        saveLocal();
         getDataLocal();
         intervalPost = BackgroundTimer.setInterval(() => {
             postOnline()

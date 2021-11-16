@@ -11,7 +11,7 @@ import NetInfo from '@react-native-community/netinfo'
 import Modal from 'react-native-modal'
 import QRCodeScanner from 'react-native-qrcode-scanner';
 import { useNavigation } from '@react-navigation/native';
-import { apiTaskSubTaskByLokasi, apiToken } from '../../API';
+import { apiRadius, apiTaskSubTaskByLokasi, apiToken } from '../../API';
 import { openDatabase } from 'react-native-sqlite-storage';
 var db = openDatabase({ name: 'SatpamDatabase.db' });
 
@@ -24,6 +24,7 @@ const ScanQR = () => {
   const [nama, setnama] = useState('');
   const [barcode, setbarcode] = useState('');
   const [message, setmessage] = useState('');
+  const [validasiRadius, setvalidasiRadius] = useState(0);
   const [scan, setscan] = useState(false);
   const [submit, setsubmit] = useState(false);
   const [isLoading, setisLoading] = useState(false);
@@ -78,19 +79,43 @@ const ScanQR = () => {
 
   const onSubmit = () => {
     setisLoading(true);
+    // var distance = getDistance(
+    //   { latitude: latitudeQR, longitude: longitudeQR },
+    //   { latitude: latitude, longitude: longitude },
+    // );
+    // console.log('Jarak : ', distance);
+    setsubmit(true);
+    getRadius();
+    // if (distance <= 2) {
+    //   setTimeout(() => {
+    //     setsubmit(true);
+    //     setisLoading(false);
+    //     getData(idLokasi)
+    //   }, 1500);
+    // } else {
+    //   setTimeout(() => {
+    //     setdata(true);
+    //     setisLoading(false);
+    //   }, 1500);
+    // }
+  }
+
+  const getRadius = async () => {
+    const radius = await AsyncStorage.getItem('radius');
+    const parRadius = JSON.parse(radius);
     var distance = getDistance(
       { latitude: latitudeQR, longitude: longitudeQR },
       { latitude: latitude, longitude: longitude },
     );
-    console.log('Jarak : ', distance);
-    if (distance <= 2) {
+    console.log('Distance: ', distance);
+    if (distance <= parRadius) {
       setTimeout(() => {
-        setsubmit(true);
         setisLoading(false);
-        getData(idLokasi)
+        getData(idLokasi);
       }, 1500);
     } else {
       setTimeout(() => {
+        setsubmit(false);
         setdata(true);
         setisLoading(false);
       }, 1500);
@@ -140,7 +165,14 @@ const ScanQR = () => {
   }
 
   useEffect(() => {
+    const getDis = async () => {
+      const radius = await AsyncStorage.getItem('radius');
+      const parRadius = JSON.parse(radius)
+      setvalidasiRadius(parRadius);
+    }
+    getDis()
     getLokasi();
+    // getRadius();
     // getData();
     getNama()
     setscan(true);
@@ -198,6 +230,9 @@ const ScanQR = () => {
                     <View style={{ margin: 8 }} >
                       <Text style={{ fontSize: 17, color: 'black' }} >Barcode</Text>
                       <Text style={{ fontSize: 17, fontWeight: '700', color: 'black' }} >{barcode}</Text>
+                    </View>
+                    <View style={{ margin: 8 }} >
+                      <Text style={{ fontSize: 17, color: 'black' }} >Validasi Radius : {validasiRadius} meter dari Checkpoint</Text>
                     </View>
                     <View style={styles.divider} />
                     <View style={{ height: 70, justifyContent: 'center', alignItems: 'center' }} >

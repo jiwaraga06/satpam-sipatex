@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView, RefreshControl, Alert, AsyncStorage } from 'react-native';
 import { Container, Text, Header, Title, Left, Body, Button, Spinner, Right } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -90,7 +90,7 @@ const CheckPoint = () => {
         })
     }
 
-    const onRefresh = React.useCallback(async () => {
+    const onRefresh = useCallback(async () => {
         setisLoading(true);
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)

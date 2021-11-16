@@ -41,21 +41,17 @@ const Login = () => {
             console.log('DATA : ', json);
             if (json.data == null) {
                 setisLoading(false);
-                setmessage(json.message)
-            }
-            else if (json.data == 'User tidak ditemukan') {
                 setmessage(json.message);
+                seterrBarcode(json.errors.barcode);
+                seterrPassword(json.errors.password);
+            } else if (json.data == 'User tidak ditemukan') {
+                setmessage(json.message);
+                seterrBarcode(json.data);
                 setisLoading(false);
             }
             else if (json.data == 'Password salah') {
                 setmessage(json.message);
                 seterrPassword(json.message);
-                setisLoading(false);
-            }
-            else if (json.errors) {
-                setmessage(json.message);
-                seterrBarcode(json.errors.barcode);
-                seterrPassword(json.errors.password);
                 setisLoading(false);
             }
             else if (json.message == 'Berhasil login') {
@@ -66,6 +62,11 @@ const Login = () => {
                 AsyncStorage.setItem('role', JSON.stringify(json.data.user_roles));
                 AsyncStorage.setItem('gender', json.data.gender);
                 navigation.replace('Home');
+            } else {
+                setmessage(json.message);
+                seterrBarcode(json.errors.barcode);
+                seterrPassword(json.errors.password);
+                setisLoading(false);
             }
         } catch (error) {
             console.log('Error Login : ', error);
