@@ -166,10 +166,16 @@ const AbsenSatpam = ({ route }) => {
         const waktu = new Date().toLocaleTimeString();
         const barcode = await AsyncStorage.getItem('barcode');
         var days;
-        if (day.toString().length < 2) {
+        if (day.toString().length == 1) {
             days = `0${day}`
         } else {
             days = day
+        }
+        var months;
+        if (bulan.toString().length == 1) {
+            months = `0${bulan}`
+        } else {
+            months = bulan;
         }
         // setisLoading(true);
         Geolocation.getCurrentPosition(async (position) => {
@@ -177,7 +183,7 @@ const AbsenSatpam = ({ route }) => {
                 if (state.isConnected) {
                     const data = {
                         "data": [{
-                            "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
+                            "tgl_absen": `${tahun}-${months}-${days} ${waktu}`,
                             "barcode": barcode,
                             "id_lokasi": id_lokasi,
                             "lati": position.coords.latitude,
@@ -213,7 +219,7 @@ const AbsenSatpam = ({ route }) => {
                 } else {
                     const data =
                     {
-                        "tgl_absen": `${tahun}-${bulan}-${days} ${waktu}`,
+                        "tgl_absen": `${tahun}-${months}-${days} ${waktu}`,
                         "barcode": barcode,
                         "id_lokasi": id_lokasi,
                         "lati": position.coords.latitude,
