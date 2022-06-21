@@ -43,8 +43,8 @@ const EditCheckPointSubTask = ({ route }) => {
             "keterangan": keterangan,
             "is_aktif": isAktif
         }
-        // NetInfo.addEventListener(async (state) => {
-        if (netInfo) {
+        NetInfo.addEventListener(async (state) => {
+        if (state.isConnected) {
             setisLoading(true);
             try {
                 const response = await fetch(apiUpdateSubTask(), {
@@ -58,6 +58,10 @@ const EditCheckPointSubTask = ({ route }) => {
                 });
                 const json = await response.json();
                 console.log(json);
+                if (response.status == 500) {
+                    setisLoading(false);
+                    Alert.alert('information', response.body);
+                }
                 if (json.errors) {
                     setisLoading(false);
                     setmessage(json.message);
@@ -81,7 +85,7 @@ const EditCheckPointSubTask = ({ route }) => {
             }
             updateValueTableSubTask(id_task, subTask, keterangan, isAktif, date, id)
         }
-        // })
+        })
     }
     useEffect(() => {
         setsubTask(sub_task);

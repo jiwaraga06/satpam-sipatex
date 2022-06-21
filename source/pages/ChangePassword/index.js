@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, View, TouchableOpacity,ScrollView} from 'react-native';
 import { Container, Header, Item, Text, Input, Button, Spinner } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
@@ -63,7 +63,7 @@ const ChangePassword = () => {
 
     return (
         <Container>
-            <View style={{ margin: 8 }} >
+            <ScrollView style={{ margin: 8 }} >
                 <Item regular style={{ margin: 8 }} >
                     <MaterialCommunityIcons
                         name='account-box'
@@ -152,12 +152,12 @@ const ChangePassword = () => {
                         <Text style={styles.errorText} >{errPasswordNew}</Text>
                         : <View />
                 }
-            </View>
             <View style={{ margin: 8 }} >
                 <Button full style={styles.btnSubmit} onPress={() => postChangePassword()} >
                     <Text style={styles.btnFont} >Change Password</Text>
                 </Button>
             </View>
+            </ScrollView>
             <View style={{ flex: 1, justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
                 <View style={{ flexDirection: 'row', alignItems: "center" }} >
                     <MaterialIcons

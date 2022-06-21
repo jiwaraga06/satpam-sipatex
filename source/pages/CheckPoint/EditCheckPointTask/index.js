@@ -39,8 +39,8 @@ const EditCheckPointTask = ({ route }) => {
             'task': task,
             'user_creator': barcode
         }
-        // Netinfo.addEventListener(async (state) => {
-        if (netInfo) {
+        Netinfo.addEventListener(async (state) => {
+        if (state.isConnected) {
 
             setisLoading(true);
             try {
@@ -55,6 +55,10 @@ const EditCheckPointTask = ({ route }) => {
                 });
                 const json = await response.json();
                 console.log(json);
+                if (response.status == 500) {
+                    setisLoading(false);
+                    Alert.alert('information', response.body);
+                }
                 if (json.errors) {
                     setisLoading(false);
                     setmessage(json.message);
@@ -76,7 +80,7 @@ const EditCheckPointTask = ({ route }) => {
             }
             updateValueTableTask(id_lokasi, task, barcode, date, id);
         }
-        // })
+        })
 
     }
     useEffect(() => {

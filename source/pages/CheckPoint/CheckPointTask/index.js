@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { Container, Text, Header, Title, Left, Body, Button, Right } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Feather from 'react-native-vector-icons/Feather';
 import Modal from 'react-native-modal';
 import { useNavigation } from '@react-navigation/native';
 import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
@@ -75,34 +76,36 @@ const CheckPointTask = ({ route }) => {
                     }>
                     {
                         netInfo == true ?
-                            task == null ?
+                            task.length == 0 ?
                                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                                     <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Kosong</Text>
                                 </View>
                                 :
                                 task.map((item, index) => {
                                     return <View style={styles.card} key={index} >
-                                        <Text style={{ fontSize: 17, fontWeight: '600', color: 'black' }} >User Creator : {item.user_creator}</Text>
-                                        <Text style={{ fontSize: 16, fontWeight: '700', color: 'black' }} >Task : {item.task}</Text>
-                                        <View style={styles.divider} />
-                                        <View style={{ margin: 8 }} >
-                                            <Button full style={styles.btnUbah} onPress={() => {
-                                                navigation.navigate('EditCheckPointTask', {
-                                                    id: item.id,
-                                                    id_lokasi: id_lokasi,
-                                                    valueTask: item.task
-                                                })
-                                            }} >
-                                                <Text style={styles.btnFont} >Ubah Task</Text>
-                                            </Button>
-                                            <Button full style={styles.btnShowTask} onPress={() => {
-                                                navigation.navigate('CheckPointSubTask', {
-                                                    sub_task: item.sub_task,
-                                                    id_task: item.id
-                                                })
-                                            }} >
-                                                <Text style={styles.btnFont} >Lihat Detail Task</Text>
-                                            </Button>
+                                        <View style={{ flexDirection: 'row', justifyContent: "space-between" }} >
+                                            <View style={{ flex: 2 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: '700', color: 'black' }} >{item.task}</Text>
+                                            </View>
+                                            <View style={{ flexDirection: "row" }} >
+                                                <TouchableOpacity onPress={() => {
+                                                    navigation.navigate('EditCheckPointTask', {
+                                                        id: item.id,
+                                                        id_lokasi: id_lokasi,
+                                                        valueTask: item.task
+                                                    })
+                                                }} >
+                                                    <Feather name='edit' size={32} color="#48466D" style={{ margin: 8 }} />
+                                                </TouchableOpacity>
+                                                <TouchableOpacity onPress={() => {
+                                                    navigation.navigate('CheckPointSubTask', {
+                                                        sub_task: item.sub_task,
+                                                        id_task: item.id
+                                                    })
+                                                }} >
+                                                    <Feather name='info' size={32} color="#3D84A8" style={{ margin: 8 }} />
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
                                     </View>
                                 })
@@ -113,28 +116,29 @@ const CheckPointTask = ({ route }) => {
                                 :
                                 listLocal.map((item, index) => {
                                     return <View style={styles.card} key={index} >
-                                        <Text style={{ fontSize: 17, fontWeight: '600', color: 'black' }} >User Creator : {item.user_creator}</Text>
-                                        <Text style={{ fontSize: 16, fontWeight: '700', color: 'black' }} >Task : {item.task}</Text>
-                                        <View style={styles.divider} />
-                                        {/* <Text>id task {item.id_lokasi}</Text> */}
-                                        <View style={{ margin: 8 }} >
-                                            <Button full style={styles.btnUbah} onPress={() => {
-                                                navigation.navigate('EditCheckPointTask', {
-                                                    id: item.id,
-                                                    id_lokasi: id_lokasi,
-                                                    valueTask: item.task
-                                                })
-                                            }} >
-                                                <Text style={styles.btnFont} >Ubah Task</Text>
-                                            </Button>
-                                            <Button full style={styles.btnShowTask} onPress={() => {
-                                                navigation.navigate('CheckPointSubTask', {
-                                                    sub_task: item.sub_task,
-                                                    id_task: item.id_task
-                                                })
-                                            }} >
-                                                <Text style={styles.btnFont} >Lihat Sub Task</Text>
-                                            </Button>
+                                        <View style={{ flexDirection: "row", justifyContent: "space-between" }} >
+                                            <View style={{ flex: 2 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: '700', color: 'black' }} >{item.task}</Text>
+                                            </View>
+                                            <View style={{ flexDirection: 'row' }} >
+                                                <Button full style={styles.btnUbah} onPress={() => {
+                                                    navigation.navigate('EditCheckPointTask', {
+                                                        id: item.id,
+                                                        id_lokasi: id_lokasi,
+                                                        valueTask: item.task
+                                                    })
+                                                }} >
+                                                    <Feather name='edit' size={32} color="#48466D" style={{ margin: 8 }} />
+                                                </Button>
+                                                <Button full style={styles.btnShowTask} onPress={() => {
+                                                    navigation.navigate('CheckPointSubTask', {
+                                                        sub_task: item.sub_task,
+                                                        id_task: item.id_task
+                                                    })
+                                                }} >
+                                                    <Feather name='info' size={32} color="#3D84A8" style={{ margin: 8 }} />
+                                                </Button>
+                                            </View>
                                         </View>
                                     </View>
                                 })

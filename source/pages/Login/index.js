@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, View, TouchableOpacity, AsyncStorage } from 'react-native';
+import { Alert, StyleSheet, View, TouchableOpacity, AsyncStorage,ScrollView } from 'react-native';
 import { Container, Header, Item, Text, Input, Button, Spinner } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
@@ -88,7 +88,7 @@ const Login = () => {
 
     return (
         <Container>
-            <View style={{ margin: 8 }} >
+            <ScrollView style={{ margin: 8 }} >
                 <Item regular style={{ margin: 8 }} >
                     <MaterialCommunityIcons
                         name='account-box'
@@ -142,12 +142,12 @@ const Login = () => {
                         <Text style={styles.errorText} >{errPassword}</Text>
                         : <View />
                 }
-            </View>
             <View style={{ margin: 8 }} >
                 <Button full style={styles.btnSubmit} onPress={() => postLogin()} >
                     <Text style={styles.btnFont} >Login</Text>
                 </Button>
             </View>
+            </ScrollView>
             <View style={{ flex: 1, justifyContent: "flex-end", marginBottom: 30, alignItems: 'center' }} >
                 <View style={{ flexDirection: 'row', alignItems: "center" }} >
                     <MaterialIcons

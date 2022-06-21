@@ -58,8 +58,8 @@ const AddCheckPointTask = ({ route }) => {
             'task': task,
             'user_creator': barcode
         }
-        // NetInfo.addEventListener(async (state) => {
-            if (netInfo) {
+        NetInfo.addEventListener(async (state) => {
+            if (state.isConnected) {
                 setisLoading(true);
                 try {
                     const response = await fetch(apiBikinTask(), {
@@ -73,6 +73,10 @@ const AddCheckPointTask = ({ route }) => {
                     });
                     const json = await response.json();
                     console.log(json);
+                    if (response.status == 500) {
+                        setisLoading(false);
+                        Alert.alert('information', response.body);
+                    }
                     if (json.errors) {
                         setisLoading(false);
                         setmessage(json.message);
@@ -80,7 +84,7 @@ const AddCheckPointTask = ({ route }) => {
                     } else {
                         setisLoading(false);
                         setmessagesuccess(json);
-                        // navigation.goBack();
+                        //navigation.goBack();
                     }
                 } catch (error) {
                     console.log('Error Tambah Checkpoint : ', error);
@@ -93,7 +97,7 @@ const AddCheckPointTask = ({ route }) => {
                 }
                 insertValueTableTaskForm(id_lokasi, listLocal.id_task + 1, task, barcode, date, date)
             }
-        // })
+        })
 
     }
     useEffect(() => {

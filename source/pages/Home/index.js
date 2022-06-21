@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { StyleSheet, View, TouchableOpacity, StatusBar, AsyncStorage, ScrollView, Alert, AppState } from 'react-native'
+import { StyleSheet, View, TouchableOpacity, StatusBar, AsyncStorage, ScrollView, Alert, AppState, FlatList } from 'react-native'
 import { Container, Header, Left, Body, Title, Text, Button, Spinner } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
@@ -8,7 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import BackgroundGeolocation from '@mauron85/react-native-background-geolocation';
 import BackgroundTimer from 'react-native-background-timer';
-import { apiDataCheckPoint, apiLogout, apiPostHistoryLokasiSecurity, apiRadius, apiToken } from '../../API';
+import { apiCheckPoint, apiLogout, apiPostHistoryLokasiSecurity, apiRadius, apiToken } from '../../API';
 import { deleteValueTableHistorySecurity, insertValueTableCheckpoint, insertValueTableHistorySecurity, insertValueTableSubTask, insertValueTableTask } from '../../SQLITE';
 import Netinfo, { useNetInfo } from '@react-native-community/netinfo';
 import { openDatabase } from 'react-native-sqlite-storage';
@@ -226,7 +226,7 @@ const Home = () => {
         // setsub_task([]);
         const barcode = await AsyncStorage.getItem('barcode');
         try {
-            const response = await fetch(apiDataCheckPoint(barcode), {
+            const response = await fetch(apiCheckPoint(), {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -234,6 +234,7 @@ const Home = () => {
                 }
             });
             const json = await response.json();
+            // console.log(json);
             array.push(json)
             array.map((data, index) => {
                 data.map((item, ix) => {
@@ -327,6 +328,7 @@ const Home = () => {
     }
 
     useEffect(() => {
+        getDataLocal();
         const socket = io.connect(sockectVariable);
         socket.on('connect', () => {
             console.log('socket connect');
@@ -338,9 +340,7 @@ const Home = () => {
         socket.on('disconnect', () => {
             console.log('socket disconnect');
         })
-        getRadius();
-        saveLocal();
-        getDataLocal();
+        
         intervalPost = BackgroundTimer.setInterval(() => {
             postOnline()
         }, 300000)
@@ -355,7 +355,13 @@ const Home = () => {
         // return () => {
         //     AppState.removeEventListener('change', backgroundState)
         // }
-    }, []);
+        Netinfo.addEventListener((state) => {
+            if (state.isConnected) {
+                getRadius()
+                saveLocal()
+            } 
+        })
+    }, [Netinfo]);
 
     return (
         <Container>
@@ -379,236 +385,177 @@ const Home = () => {
                         {/* <Button onPress={()=> navigation.navigate('LokalSecurity') } >
                             <Text>Ke lokal</Text>
                         </Button> */}
-                        <Text style={styles.font} >Information</Text>
+                        <Text style={styles.font} >Menu Offline</Text>
+                        <View style={{ height: 5, backgroundColor: '#F0F0F0', borderRadius: 8, marginBottom: 8 }} />
                         {
                             role.length == 0 ?
                                 <Spinner color='black' />
                                 : role.length > 1 ?
-                                    <View>
-                                        <View style={styles.viewInfo} >
-                                            {
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local Transaksi</Text>
-                                                    <Button full style={{ backgroundColor: '#ff9800', borderRadius: 6, height: 33, margin: 8 }}
-                                                        onPress={() => {
-                                                            navigation.navigate('Datalokal')
-                                                        }}>
-                                                        <Text>Data lokal</Text>
-                                                    </Button>
+                                    <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                                        <TouchableOpacity onPress={() => { navigation.navigate('Datalokal') }}>
+                                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                                <View style={styles.viewInfo} >
+                                                    <MaterialCommunityIcons
+                                                        name='database'
+                                                        color='white'
+                                                        size={50}
+                                                    />
                                                 </View>
-                                            }
-                                            <MaterialCommunityIcons
-                                                name='database'
-                                                color='white'
-                                                size={50}
-                                            />
-                                        </View>
-                                        <View style={styles.viewCheckpoint} >
-                                            {
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local Checkpoint</Text>
-                                                    <Button full style={{ backgroundColor: '#1e88e5', borderRadius: 6, height: 33, margin: 8 }}
-                                                        onPress={() => {
-                                                            navigation.navigate('LocalCheckpoint')
-                                                        }}>
-                                                        <Text>Lokal Checkpoint</Text>
-                                                    </Button>
+                                                <Text style={styles.fontMenu} >Absen lokal</Text>
+                                            </View>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => { navigation.navigate('LocalCheckpoint') }} >
+                                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                                <View style={styles.viewCheckpoint} >
+                                                    <MaterialCommunityIcons
+                                                        name='database'
+                                                        color='white'
+                                                        size={50}
+                                                    />
                                                 </View>
-                                            }
-                                            <MaterialCommunityIcons
-                                                name='database'
-                                                color='white'
-                                                size={50}
-                                            />
-                                        </View>
+                                                <Text> Checkpoint</Text>
+                                            </View>
+                                        </TouchableOpacity>
                                     </View>
                                     : role[0] == 'admin_scr' ?
-                                        <View style={styles.viewCheckpoint} >
-                                            {
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
-                                                    <Button full style={{ backgroundColor: '#1e88e5', borderRadius: 6, height: 33, margin: 8 }}
-                                                        onPress={() => {
-                                                            navigation.navigate('LocalCheckpoint')
-                                                        }}>
-                                                        <Text>Lokal Checkpoint</Text>
-                                                    </Button>
-                                                </View>
-                                            }
-                                            <MaterialCommunityIcons
-                                                name='database'
-                                                color='white'
-                                                size={50}
-                                            />
-                                        </View>
+                                        <TouchableOpacity onPress={() => { navigation.navigate('LocalCheckpoint') }} >
+                                            <View style={styles.viewCheckpoint} >
+                                                <MaterialCommunityIcons
+                                                    name='database'
+                                                    color='white'
+                                                    size={50} />
+                                            </View>
+                                            <Text>Checkpoint</Text>
+                                        </TouchableOpacity>
                                         :
-                                        <View style={styles.viewInfo} >
-                                            {
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data Local</Text>
-                                                    <Button full style={{ backgroundColor: '#ff9800', borderRadius: 6, height: 33, margin: 8 }}
-                                                        onPress={() => {
-                                                            navigation.navigate('Datalokal')
-                                                        }}>
-                                                        <Text>Data lokal</Text>
-                                                    </Button>
+                                        <TouchableOpacity onPress={() => { navigation.navigate('Datalokal') }}>
+                                            <View style={{ flexDirection: 'column', alignItems: 'center' }}>
+                                                <View style={styles.viewInfo} >
+                                                    <MaterialCommunityIcons
+                                                        name='database'
+                                                        color='white'
+                                                        size={50}
+                                                    />
                                                 </View>
-                                            }
-                                            <MaterialCommunityIcons
-                                                name='database'
-                                                color='white'
-                                                size={50}
-                                            />
-                                        </View>
+                                                <Text style={styles.fontMenu} >Menu lokal</Text>
+                                            </View>
+                                        </TouchableOpacity>
                         }
 
                     </View>
                     <View style={{ margin: 8 }} >
                         <Text style={styles.font} >Menu</Text>
+                        <View style={{ height: 5, backgroundColor: '#F0F0F0', borderRadius: 8, marginBottom: 8 }} />
                     </View>
                     {
                         role.length == 0 ?
                             <Spinner color='black' />
                             : role.length > 1 ?
-                                <View>
-                                    <View style={{ margin: 8 }} >
-                                        <View style={styles.checkPoint} >
-                                            <View>
-                                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data CheckPoint</Text>
-                                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                    onPress={() => navigation.navigate('CheckPoint')}>
-                                                    <Text style={{ color: '#112D4E' }} >Lihat Data</Text>
-                                                </Button>
-                                            </View>
-                                            <MaterialIcons
-                                                name='location-on'
-                                                color='white'
-                                                size={50}
-                                            />
-                                        </View>
-                                    </View>
-                                    <View style={{ margin: 8 }} >
-                                        <View style={styles.menuScanQR} >
-                                            <View>
-                                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Scan QR Code</Text>
-                                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                    onPress={() => navigation.navigate('ScanQR')} >
-                                                    <Text style={{ color: '#0277bd' }} >Scan Disini</Text>
-                                                </Button>
-                                            </View>
-                                            <MaterialIcons
-                                                name='qr-code-2'
-                                                color='white'
-                                                size={40}
-                                            />
-                                        </View>
-                                    </View>
-                                    <View style={{ margin: 8 }} >
-                                        <View style={styles.viewHistory} >
-                                            <View>
-                                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >History Transaksi</Text>
-                                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                    onPress={() => navigation.navigate('HistoryTransaksiAbsen')} >
-                                                    <Text style={{ color: '#009688' }} >Lihat Data</Text>
-                                                </Button>
-                                            </View>
-                                            <MaterialIcons
-                                                name='history'
-                                                color='white'
-                                                size={40}
-                                            />
-                                        </View>
-                                    </View>
-                                </View>
-                                : role[0] == 'admin_scr' ?
-                                    <View>
-                                        <View style={{ margin: 8 }} >
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-around' }} >
+                                    <TouchableOpacity onPress={() => navigation.navigate('CheckPoint')}>
+                                        <View style={{ flexDirection: "column", alignItems: "center" }}>
                                             <View style={styles.checkPoint} >
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Data CheckPoint</Text>
-                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                        onPress={() => navigation.navigate('CheckPoint')}>
-                                                        <Text style={{ color: '#112D4E' }} >Lihat Data</Text>
-                                                    </Button>
-                                                </View>
                                                 <MaterialIcons
                                                     name='location-on'
                                                     color='white'
                                                     size={50}
                                                 />
                                             </View>
+                                            <Text stFyle={styles.fontMenu}>CheckPoint</Text>
                                         </View>
-                                        <View style={{ margin: 8 }} >
-                                            <View style={styles.viewHistory} >
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >History Transaksi</Text>
-                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                        onPress={() => navigation.navigate('HistoryTransaksiAbsen')} >
-                                                        <Text style={{ color: '#009688' }} >Lihat Data</Text>
-                                                    </Button>
-                                                </View>
-                                                <MaterialIcons
-                                                    name='history'
-                                                    color='white'
-                                                    size={40}
-                                                />
-                                            </View>
-                                        </View>
-                                    </View>
-                                    : <View>
-                                        <View style={{ margin: 8 }} >
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => navigation.navigate('ScanQR')}>
+                                        <View style={{ flexDirection: "column", alignItems: "center" }}>
                                             <View style={styles.menuScanQR} >
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Scan QR Code</Text>
-                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                        onPress={() => navigation.navigate('ScanQR')} >
-                                                        <Text style={{ color: '#0277bd' }} >Scan Disini</Text>
-                                                    </Button>
-                                                </View>
                                                 <MaterialIcons
                                                     name='qr-code-2'
                                                     color='white'
-                                                    size={40}
+                                                    size={50}
                                                 />
                                             </View>
+                                            <Text stFyle={styles.fontMenu}>Scan QR</Text>
                                         </View>
-                                        <View style={{ margin: 8 }} >
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => navigation.navigate('HistoryTransaksiAbsen')}>
+                                        <View style={{ flexDirection: 'column', alignItems: 'center' }} >
                                             <View style={styles.viewHistory} >
-                                                <View>
-                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >History Transaksi</Text>
-                                                    <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                                        onPress={() => navigation.navigate('HistoryTransaksiAbsen')} >
-                                                        <Text style={{ color: '#009688' }} >Lihat Data</Text>
-                                                    </Button>
-                                                </View>
                                                 <MaterialIcons
                                                     name='history'
                                                     color='white'
-                                                    size={40}
+                                                    size={50}
                                                 />
                                             </View>
+                                            <Text style={styles.fontMenu} >History</Text>
+                                        </View>
+                                    </TouchableOpacity>
+                                </View>
+                                : role[0] == 'admin_scr' ?
+                                    <View>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }} >
+                                            <TouchableOpacity onPress={() => navigation.navigate('CheckPoint')}>
+                                                <View style={{ flexDirection: "column", alignItems: "center" }}>
+                                                    <View style={styles.checkPoint} >
+                                                        <MaterialIcons
+                                                            name='location-on'
+                                                            color='white'
+                                                            size={50}
+                                                        />
+                                                    </View>
+                                                    <Text stFyle={styles.fontMenu}>CheckPoint</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={() => navigation.navigate('HistoryTransaksiAbsen')}>
+                                                <View style={{ flexDirection: 'column', alignItems: 'center' }} >
+                                                    <View style={styles.viewHistory} >
+                                                        <MaterialIcons
+                                                            name='history'
+                                                            color='white'
+                                                            size={50}
+                                                        />
+                                                    </View>
+                                                    <Text style={styles.fontMenu} >History</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                    : <View>
+                                        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }} >
+                                            <TouchableOpacity onPress={() => navigation.navigate('ScanQR')}>
+                                                <View style={{ flexDirection: "column", alignItems: "center" }}>
+                                                    <View style={styles.menuScanQR} >
+                                                        <MaterialIcons
+                                                            name='qr-code-2'
+                                                            color='white'
+                                                            size={50}
+                                                        />
+                                                    </View>
+                                                    <Text stFyle={styles.fontMenu}>Scan QR</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                            <TouchableOpacity onPress={() => navigation.navigate('HistoryTransaksiAbsen')}>
+                                                <View style={{ flexDirection: 'column', alignItems: 'center' }} >
+                                                    <View style={styles.viewHistory} >
+                                                        <MaterialIcons
+                                                            name='history'
+                                                            color='white'
+                                                            size={50}
+                                                        />
+                                                    </View>
+                                                    <Text style={styles.fontMenu} >History</Text>
+                                                </View>
+                                            </TouchableOpacity>
                                         </View>
                                     </View>
                     }
 
-                    <View style={{ margin: 8 }} >
-                        <View style={styles.logout} >
-                            <View>
-                                <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Keluar Akun</Text>
-                                <Button style={{ height: 35, margin: 8, borderRadius: 6, elevation: 6, backgroundColor: 'white' }}
-                                    onPress={logOut}  >
-                                    <Text style={{ color: '#c62828' }} >Keluar Akun</Text>
-                                </Button>
-                            </View>
-                            <MaterialCommunityIcons
-                                name='logout'
-                                color='white'
-                                size={40}
-                            />
-                        </View>
-                    </View>
+
                 </ScrollView>
             </View>
+            <TouchableOpacity onPress={logOut} >
+                <View style={styles.logout} >
+                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Keluar Akun</Text>
+                </View>
+            </TouchableOpacity>
             {/* LOADING */}
             <Modal isVisible={loadingLogout} >
                 <View style={{ backgroundColor: 'white' }} >
@@ -641,72 +588,68 @@ const styles = StyleSheet.create({
         paddingTop: 10,
         paddingBottom: 10,
     },
+    fontMenu: {
+        fontSize: 18,
+        color: 'black',
+    },
     font: {
         fontSize: 20,
         color: 'black',
         fontWeight: '700'
     },
     viewInfo: {
-        marginTop: 8,
+        width: 80,
+        height: 80,
+        margin: 8,
+        padding: 8,
         backgroundColor: '#0d47a1',
-        borderRadius: 6,
-        elevation: 6,
-        flexDirection: 'row',
+        borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 20,
-        height: 120
     },
     viewCheckpoint: {
-        marginTop: 8,
+        width: 80,
+        height: 80,
+        margin: 8,
+        padding: 8,
         backgroundColor: '#105652',
-        borderRadius: 6,
-        elevation: 6,
-        flexDirection: 'row',
+        borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: 20,
-        height: 120
     },
     viewHistory: {
-        marginTop: 8,
+        width: 80,
+        height: 80,
+        margin: 8,
+        padding: 8,
         backgroundColor: '#009688',
-        borderRadius: 6,
-        elevation: 6,
-        flexDirection: 'row',
+        borderRadius: 12,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        height: 120
     },
     menuScanQR: {
-        marginTop: 8,
+        width: 80,
+        height: 80,
+        margin: 8,
+        padding: 8,
         backgroundColor: '#0277bd',
-        borderRadius: 6,
-        flexDirection: 'row',
+        borderRadius: 12,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        height: 120
     },
     checkPoint: {
-        marginTop: 8,
+        width: 80,
+        height: 80,
+        margin: 8,
+        padding: 8,
         backgroundColor: '#112D4E',
-        borderRadius: 6,
-        flexDirection: 'row',
+        borderRadius: 12,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        height: 120
     },
     logout: {
-        marginTop: 8,
+        margin: 8,
         backgroundColor: '#c62828',
-        borderRadius: 6,
-        flexDirection: 'row',
+        borderRadius: 10,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: 20,
-        height: 120
+        justifyContent: 'center',
+        height: 45
     },
 })

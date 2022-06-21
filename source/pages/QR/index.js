@@ -109,16 +109,16 @@ const ScanQR = () => {
     );
     console.log('Distance: ', distance);
     if (distance <= parRadius) {
-      setTimeout(() => {
+      // setTimeout(() => {
         setisLoading(false);
         getData(idLokasi);
-      }, 1500);
+      // }, 1500);
     } else {
-      setTimeout(() => {
+      // setTimeout(() => {
         setsubmit(false);
         setdata(true);
         setisLoading(false);
-      }, 1500);
+      // }, 1500);
     }
   }
 
@@ -163,6 +163,8 @@ const ScanQR = () => {
     // })
 
   }
+
+  
 
   useEffect(() => {
     const getDis = async () => {

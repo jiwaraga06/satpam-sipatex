@@ -5,6 +5,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import NetInfo, { addEventListener } from '@react-native-community/netinfo';
+import { Table, Row, Rows } from 'react-native-table-component';
 import Modal from 'react-native-modal'
 import DatePicker from 'react-native-datepicker';
 import { useNavigation } from '@react-navigation/native';
@@ -20,6 +21,8 @@ const HistoryTransaksiAbsen = () => {
     const [List, setList] = useState([]);
     const [task, settask] = useState([]);
     const [number, setnumber] = useState(false);
+    const [photo, setphoto] = useState(false);
+    const [img, setimg] = useState("");
     const [tglAwal, settglAwal] = useState('');
     const [tglAkhir, settglAkhir] = useState('');
 
@@ -194,10 +197,42 @@ const HistoryTransaksiAbsen = () => {
                                 </View>
                                 : List.map((item, index) => {
                                     return <View key={index} style={styles.card} >
-                                        <Text style={{ fontSize: 18 }} >Lokasi : {item.nama_lokasi}</Text>
-                                        <View style={styles.divider} />
-                                        <Text style={{ fontSize: 17, margin: 3 }} >{item.nama}</Text>
-                                        <Text style={{ fontSize: 17, margin: 3, fontWeight: '700' }}>{item.barcode}</Text>
+                                        <View style={{ flexDirection: 'column' }} >
+                                            <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                                <View style={{ flex: 2 }} >
+                                                    <Text style={{ fontSize: 17 }} >Barcode</Text>
+                                                </View>
+                                                <View style={{ flex: 0.2 }} >
+                                                    <Text style={{ fontSize: 17 }} >:</Text>
+                                                </View>
+                                                <View style={{ flex: 3 }} >
+                                                    <Text style={{ fontSize: 17 }} >{item.barcode}</Text>
+                                                </View>
+                                            </View>
+                                            <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                                <View style={{ flex: 2 }} >
+                                                    <Text style={{ fontSize: 17 }} >Nama</Text>
+                                                </View>
+                                                <View style={{ flex: 0.2 }} >
+                                                    <Text style={{ fontSize: 17 }} >:</Text>
+                                                </View>
+                                                <View style={{ flex: 3 }} >
+                                                    <Text style={{ fontSize: 17 }} >{item.nama}</Text>
+                                                </View>
+                                            </View>
+                                            <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                                <View style={{ flex: 2 }} >
+                                                    <Text style={{ fontSize: 17 }} >Lokasi</Text>
+                                                </View>
+                                                <View style={{ flex: 0.2 }} >
+                                                    <Text style={{ fontSize: 17 }} >:</Text>
+                                                </View>
+                                                <View style={{ flex: 3 }} >
+                                                    <Text style={{ fontSize: 17 }} >{item.nama_lokasi}</Text>
+                                                </View>
+                                            </View>
+
+                                        </View>
                                         <View style={{ margin: 8 }} >
                                             <Button full style={styles.btnLihatTask} onPress={() => {
                                                 console.log(item.task);
@@ -213,41 +248,59 @@ const HistoryTransaksiAbsen = () => {
                 </ScrollView>
             </View>
             <Modal isVisible={number} >
-                <View style={{ flex: 1, backgroundColor: 'white' }} >
+                <View style={{ flex: 1, backgroundColor: 'white', borderRadius:12 }} >
                     <ScrollView>
                         {
                             task.map((item, index) => {
                                 return <View key={index} style={{ margin: 8 }} >
-                                    <View style={{ margin: 8, alignItems: "center" }} >
-                                        <Text style={{ fontSize: 15 }} >{item.nama_task}</Text>
-                                        <Text style={{ fontSize: 16, fontWeight: '700' }} >{item.nama_sub_task}</Text>
-                                    </View>
-                                    <View style={{ alignItems: 'center' }} >
-                                        {
-                                            item.photo == null ?
-                                                <View style={styles.imgNull} >
-                                                    <MaterialIcons
-                                                        name='image-not-supported'
-                                                        color='#bdbdbd'
-                                                        size={120}
-                                                    />
-                                                </View>
-                                                :
-                                                <Image
-                                                    source={{ uri: item.photo }}
-                                                    style={{ width: 300, height: 350, marginTop: -20, marginBottom: -20, resizeMode: 'stretch', borderRadius: 4, transform: [{ rotate: '90deg' }] }}
-                                                />
-                                        }
-                                    </View>
-                                    <View style={{ margin: 8 }} >
-                                        <View style={{ flexDirection: 'column' }} >
-                                            <View style={{ flexDirection: 'row', alignItems: 'center' }} >
-                                                <View style={{ width: 120 }} >
-                                                    <Text style={{ fontWeight: '700', fontSize: 18 }} >Checklist</Text>
-                                                </View>
-                                                <View>
-                                                    <Text style={{ fontWeight: '700', fontSize: 17 }} >: </Text>
-                                                </View>
+
+                                    {/* Tabel Detail */}
+                                    <View style={{ flexDirection: 'column' }} >
+                                        {/* Task */}
+                                        <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                            <View style={{ flex: 2 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: 'bold' }} >Task</Text>
+                                            </View>
+                                            <View style={{ flex: 0.2 }} >
+                                                <Text style={{ fontSize: 17 }} >:</Text>
+                                            </View>
+                                            <View style={{ flex: 3 }} >
+                                                <Text style={{ fontSize: 17 }} >{item.nama_task}</Text>
+                                            </View>
+                                        </View>
+                                        {/* Detail Task */}
+                                        <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                            <View style={{ flex: 2 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: 'bold' }} >Detail Task</Text>
+                                            </View>
+                                            <View style={{ flex: 0.2 }} >
+                                                <Text style={{ fontSize: 17 }} >:</Text>
+                                            </View>
+                                            <View style={{ flex: 3 }} >
+                                                <Text style={{ fontSize: 17 }} >{item.nama_sub_task}</Text>
+                                            </View>
+                                        </View>
+                                        {/* Catatan */}
+                                        <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                            <View style={{ flex: 2 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: 'bold' }} >Catatan</Text>
+                                            </View>
+                                            <View style={{ flex: 0.2 }} >
+                                                <Text style={{ fontSize: 17 }} >:</Text>
+                                            </View>
+                                            <View style={{ flex: 3 }} >
+                                                <Text style={{ fontSize: 17 }} >{item.note}</Text>
+                                            </View>
+                                        </View>
+                                        {/* Checklist */}
+                                        <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                            <View style={{ flex: 2 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: 'bold' }} >Checklist</Text>
+                                            </View>
+                                            <View style={{ flex: 0.2 }} >
+                                                <Text style={{ fontSize: 17 }} >:</Text>
+                                            </View>
+                                            <View style={{ flex: 3 }} >
                                                 <View>
                                                     <FontAwesome
                                                         name='check-square-o'
@@ -255,21 +308,26 @@ const HistoryTransaksiAbsen = () => {
                                                         size={25}
                                                         style={{ marginLeft: 8 }} />
                                                 </View>
-                                                <View></View>
                                             </View>
-                                            <View style={{ height: 3, backgroundColor: '#e0e0e0', margin: 8 }} />
-                                            <View style={{ flexDirection: 'row', marginBottom: 12 }} >
-                                                <View style={{ width: 120 }} >
-                                                    <Text style={{ fontWeight: '700', fontSize: 18 }} >Catatan</Text>
-                                                </View>
-                                                <View>
-                                                    <Text style={{ fontWeight: '700', fontSize: 17 }} >: </Text>
-                                                </View>
-                                                <View>
-                                                    <Text style={{ fontWeight: '700', fontSize: 17 }} >{item.note}</Text>
-                                                </View>
+                                        </View>
+                                        {/* Photo */}
+                                        <View style={{ flexDirection: 'row', marginTop: 4 }} >
+                                            <View style={{ flex: 2, marginTop: 6 }} >
+                                                <Text style={{ fontSize: 17, fontWeight: 'bold' }} >Photo</Text>
                                             </View>
-                                            <View style={{ height: 3, backgroundColor: '#e0e0e0', margin: 8 }} />
+                                            <View style={{ flex: 0.2, marginTop: 6 }} >
+                                                <Text style={{ fontSize: 17 }} >:</Text>
+                                            </View>
+                                            <View style={{ flex: 3, }} >
+                                                <TouchableOpacity onPress={() => {
+                                                    setimg(item.photo);
+                                                    setphoto(true);
+                                                }} >
+                                                    <View style={{ margin: 8, padding: 8, backgroundColor: '#444F5A', borderRadius: 12 }} >
+                                                        <Text style={{ fontSize: 17, color: 'white' }} >Lihat Poto</Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            </View>
                                         </View>
                                     </View>
                                     <View style={styles.divider} />
@@ -285,6 +343,33 @@ const HistoryTransaksiAbsen = () => {
                             <Text style={styles.btnFont} >Tutup</Text>
                         </Button>
                     </View>
+                </View>
+            </Modal>
+            {/* // */}
+            <Modal isVisible={photo} >
+                <View style={{ flex: 0.5, backgroundColor: 'white', borderRadius: 12 }} >
+                    <View style={{ flex: 1, justifyContent: 'center',alignItems: 'center' }} >
+                        {
+                            img == 'null' ?
+                                <View style={styles.imgNull} >
+                                    <MaterialIcons
+                                        name='image-not-supported'
+                                        color='#bdbdbd'
+                                        size={120}
+                                    />
+                                </View>
+                                :
+                                <Image
+                                    source={{ uri: img }}
+                                    style={{ width: 300, height: 300, resizeMode: 'stretch', borderRadius: 8, transform: [{ rotate: '90deg' }] }}
+                                />
+                        }
+                    </View>
+                    <TouchableOpacity onPress={() => { setphoto(false); setimg("") }}>
+                        <View style={{ backgroundColor: "#444F5A", margin: 8, padding: 8, borderRadius: 10, alignItems: "center", height: 45 }} >
+                            <Text style={{ color: 'white', fontSize: 17, fontWeight: '700' }} >Tutup</Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
             </Modal>
         </Container>
