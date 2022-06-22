@@ -9,7 +9,7 @@ import Modal from 'react-native-modal';
 import NetInfo, { useNetInfo } from '@react-native-community/netinfo';
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps';
 import { openDatabase } from 'react-native-sqlite-storage';
-import { apiDataCheckPoint, apiToken } from '../../../API';
+import { apiCheckPoint, apiDataCheckPoint, apiToken } from '../../../API';
 
 var db = openDatabase({ name: 'SatpamDatabase.db' });
 const initialState = {
@@ -35,7 +35,7 @@ const CheckPoint = () => {
         const barcode = await AsyncStorage.getItem('barcode');
         setisLoading(true)
         try {
-            const response = await fetch(apiDataCheckPoint(barcode), {
+            const response = await fetch(apiCheckPoint(), {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -63,7 +63,7 @@ const CheckPoint = () => {
                 var temp = [];
                 for (let i = 0; i < results.rows.length; ++i)
                     temp.push(results.rows.item(i));
-                console.log(temp);
+                console.log('Lokal list check point' ,temp.length);
                 setisLoading(false)
                 setlistLocal(temp)
             });
@@ -113,7 +113,6 @@ const CheckPoint = () => {
             }
         })
         // getDataCheckpoint()
-        getDataCheckpointLokal()
         getLokasi()
     }, [NetInfo]);
     return (
@@ -165,12 +164,12 @@ const CheckPoint = () => {
                                                         <View />
                                                         : list.map((item, index) => {
                                                             return <Marker
-                                                                pinColor='#2196f3'
+                                                                pinColor='#E84545'
                                                                 key={index}
                                                                 coordinate={{
                                                                     latitude: item.lati,
                                                                     longitude: item.longi,
-                                                                }}
+                                                                }}  
                                                                 title={item.nama_lokasi}
                                                                 description={item.keterangan}>
                                                                 <Callout
@@ -218,11 +217,8 @@ const CheckPoint = () => {
                                     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                                         <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Loading</Text>
                                     </View>
-                                    : list.length == 0 ?
-                                        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
-                                            <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Kosong</Text>
-                                        </View>
-                                        : list.map((item, index) => {
+                                    : list.length != 0 ?
+                                         list.map((item, index) => {
                                             return <View style={styles.card} key={index} >
                                                 <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                                                     <View style={{ flex: 2 }} >
@@ -252,7 +248,9 @@ const CheckPoint = () => {
                                                     </View>
                                                 </View>
                                             </View>
-                                        })
+                                        }) : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
+                                        <Text style={{ color: '#bdbdbd', fontSize: 17 }} >Data Kosong</Text>
+                                    </View>
                             : viewMap == true ?
                                 <View style={styles.container}>
                                     {
@@ -271,7 +269,7 @@ const CheckPoint = () => {
                                                     <View />
                                                     : listLocal.map((item, index) => {
                                                         return <Marker
-                                                            pinColor='#2196f3'
+                                                            pinColor='#E84545'
                                                             key={index}
                                                             coordinate={{
                                                                 latitude: item.lati,

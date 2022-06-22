@@ -39,12 +39,10 @@ const Login = () => {
             });
             const json = await response.json();
             console.log('DATA : ', json);
-            if (json.data == null) {
+            if (response.status == 400) {
                 setisLoading(false);
                 setmessage(json.message);
-                seterrBarcode(json.errors.barcode);
-                seterrPassword(json.errors.password);
-            } else if (json.data == 'User tidak ditemukan') {
+            } else if (json.status == 500) {
                 setmessage(json.message);
                 seterrBarcode(json.data);
                 setisLoading(false);

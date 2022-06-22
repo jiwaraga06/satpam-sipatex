@@ -234,8 +234,9 @@ const Home = () => {
                 }
             });
             const json = await response.json();
-            // console.log(json);
+            console.log('Json save local',json);
             array.push(json)
+           if(array.length != 0){
             array.map((data, index) => {
                 data.map((item, ix) => {
                     // console.log(item);
@@ -274,6 +275,7 @@ const Home = () => {
                     })
                 })
             })
+           }
         } catch (error) {
             console.log('Error get api data checkpoint : ', error);
         }
@@ -308,25 +310,6 @@ const Home = () => {
         }
     }
 
-    var intervalSaveLokal;
-    const getRadius = async () => {
-        try {
-            const response = await fetch(apiRadius(), {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': apiToken()
-                }
-            });
-            const json = await response.json();
-            console.log('Radius: ', json);
-            AsyncStorage.setItem('radius', `${json.radius}`)
-        } catch (error) {
-            console.log('Error radius: ', error);
-            Alert.alert('Information Radius', error);
-        }
-    }
-
     useEffect(() => {
         getDataLocal();
         const socket = io.connect(sockectVariable);
@@ -357,11 +340,10 @@ const Home = () => {
         // }
         Netinfo.addEventListener((state) => {
             if (state.isConnected) {
-                getRadius()
                 saveLocal()
             } 
         })
-    }, [Netinfo]);
+    }, []);
 
     return (
         <Container>

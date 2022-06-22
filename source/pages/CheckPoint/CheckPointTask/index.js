@@ -121,7 +121,7 @@ const CheckPointTask = ({ route }) => {
                                                 <Text style={{ fontSize: 17, fontWeight: '700', color: 'black' }} >{item.task}</Text>
                                             </View>
                                             <View style={{ flexDirection: 'row' }} >
-                                                <Button full style={styles.btnUbah} onPress={() => {
+                                                <TouchableOpacity onPress={() => {
                                                     navigation.navigate('EditCheckPointTask', {
                                                         id: item.id,
                                                         id_lokasi: id_lokasi,
@@ -129,15 +129,15 @@ const CheckPointTask = ({ route }) => {
                                                     })
                                                 }} >
                                                     <Feather name='edit' size={32} color="#48466D" style={{ margin: 8 }} />
-                                                </Button>
-                                                <Button full style={styles.btnShowTask} onPress={() => {
+                                                </TouchableOpacity>
+                                                <TouchableOpacity onPress={() => {
                                                     navigation.navigate('CheckPointSubTask', {
                                                         sub_task: item.sub_task,
                                                         id_task: item.id_task
                                                     })
                                                 }} >
                                                     <Feather name='info' size={32} color="#3D84A8" style={{ margin: 8 }} />
-                                                </Button>
+                                                </TouchableOpacity>
                                             </View>
                                         </View>
                                     </View>
