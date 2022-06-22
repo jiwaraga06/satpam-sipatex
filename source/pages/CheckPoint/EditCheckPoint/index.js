@@ -69,8 +69,8 @@ const EditCheckPoint = ({ route }) => {
             'keterangan': keterangan,
             'user_creator': barcode
         }
-        // NetInfo.addEventListener(async (state) => {
-        if (netInfo) {
+        NetInfo.addEventListener(async (state) => {
+        if (state.isConnected) {
             setisLoading(true);
             try {
                 const response = await fetch(apiUpdateCheckPoint(), {
@@ -84,6 +84,10 @@ const EditCheckPoint = ({ route }) => {
                 });
                 const json = await response.json();
                 // console.log(json);
+                if (response.status == 500) {
+                    setisLoading(false);
+                    Alert.alert('information', response.body);
+                }
                 if (json.errors) {
                     setisLoading(false);
                     setmessage(json.message);
@@ -106,7 +110,7 @@ const EditCheckPoint = ({ route }) => {
             }
             updateValueTableCheckpoint(nama_lokasi, currentPosition.latitude, currentPosition.longitude, keterangan, date, barcode, id);
         }
-        // })
+        })
     }
     useEffect(() => {
         getLokasi()

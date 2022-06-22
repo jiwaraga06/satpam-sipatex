@@ -27,6 +27,11 @@ const apiDataCheckPoint = (barcode) => {
     const url = `https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/checkpoint?user_creator=${barcode}`;
     return url;
 }
+const apiCheckPoint = () => {
+    // const url = `http://192.168.50.95/simr/public/api/v1/mobile-app/secsms/checkpoint?user_creator=${barcode}`;
+    const url = 'https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/checkpoint';
+    return url;
+}
 const apiSimpanCheckPoint = () => {
     // const url = 'http://192.168.50.95/simr/public/api/v1/mobile-app/secsms/checkpoint/store';
     const url = 'https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/checkpoint/store';
@@ -84,6 +89,7 @@ export {
     apiChangePassword,
     apiPostHistoryLokasiSecurity,
     apiDataCheckPoint,
+    apiCheckPoint,
     apiSimpanCheckPoint,
     apiUpdateCheckPoint,
     apiBikinTask,
