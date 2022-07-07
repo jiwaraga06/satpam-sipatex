@@ -9,13 +9,14 @@ import { Table, Row, Rows } from 'react-native-table-component';
 import Modal from 'react-native-modal'
 import DatePicker from 'react-native-datepicker';
 import { useNavigation } from '@react-navigation/native';
-import { apiHistoryTransaksiAbsen, apiToken } from '../../API';
+import { apiHistoryTransaksiAbsen, apiToken,apiHistoryTransaksiAbsenAdmin } from '../../API';
 
 
 const HistoryTransaksiAbsen = () => {
     const navigation = useNavigation();
 
     const [netInfo, setnetInfo] = useState(false);
+    const [role, setrole] = useState([]);
     const [showOption, setshowOption] = useState(true);
     const [isLoading, setisLoading] = useState(false);
     const [List, setList] = useState([]);
@@ -26,35 +27,96 @@ const HistoryTransaksiAbsen = () => {
     const [tglAwal, settglAwal] = useState('');
     const [tglAkhir, settglAkhir] = useState('');
 
+    const getRole = async () => {
+        const roles = await AsyncStorage.getItem('role');
+        setrole(JSON.parse(roles));
+
+    }
+
     const getData = async () => {
         setisLoading(true);
         const barcode = await AsyncStorage.getItem('barcode');
-        try {
-            const response = await fetch(apiHistoryTransaksiAbsen(barcode, tglAwal, tglAkhir), {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': apiToken()
+        if (role.length > 1) {
+            console.log('adm, scr');
+            try {
+                const response = await fetch(apiHistoryTransaksiAbsenAdmin(tglAwal, tglAkhir), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': apiToken()
+                    }
+                });
+                const json = await response.json();
+                console.log('Data: ', json);
+                if (json.errors) {
+                    setisLoading(false);
+                    Alert.alert('Information', 'Tanggal Awal dan Akhir Harus di Isi')
+                } else {
+                    setisLoading(false);
+                    setList(json)
                 }
-            });
-            const json = await response.json();
-            console.log('Data: ', json);
-            if (json.errors) {
-                setisLoading(false);
-                Alert.alert('Information', 'Tanggal Awal dan Akhir Harus di Isi')
-            } else {
-                setisLoading(false);
-                setList(json)
-            }
 
-        } catch (error) {
-            setisLoading(false);
-            console.log('Error : ', error);
-            Alert.alert('Information', error)
+            } catch (error) {
+                setisLoading(false);
+                console.log('Error : ', error);
+                Alert.alert('Information', error)
+            }
+        } else if (role[0] == 'admin_scr') {
+            console.log('adm');
+            try {
+                const response = await fetch(apiHistoryTransaksiAbsenAdmin(tglAwal, tglAkhir), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': apiToken()
+                    }
+                });
+                const json = await response.json();
+                console.log('Data: ', json);
+                if (json.errors) {
+                    setisLoading(false);
+                    Alert.alert('Information', 'Tanggal Awal dan Akhir Harus di Isi')
+                } else {
+                    setisLoading(false);
+                    setList(json)
+                }
+
+            } catch (error) {
+                setisLoading(false);
+                console.log('Error : ', error);
+                Alert.alert('Information', error)
+            }
+        } else if (role[0] == 'security') {
+            console.log('scr');
+            try {
+                const response = await fetch(apiHistoryTransaksiAbsen(barcode, tglAwal, tglAkhir), {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': apiToken()
+                    }
+                });
+                const json = await response.json();
+                console.log('Data: ', json);
+                if (json.errors) {
+                    setisLoading(false);
+                    Alert.alert('Information', 'Tanggal Awal dan Akhir Harus di Isi')
+                } else {
+                    setisLoading(false);
+                    setList(json)
+                }
+
+            } catch (error) {
+                setisLoading(false);
+                console.log('Error : ', error);
+                Alert.alert('Information', error)
+            }
         }
+
     }
 
     useEffect(() => {
+        getRole();
         console.log(tglAwal);
         NetInfo.addEventListener((state) => {
             setnetInfo(state.isConnected)
@@ -248,7 +310,7 @@ const HistoryTransaksiAbsen = () => {
                 </ScrollView>
             </View>
             <Modal isVisible={number} >
-                <View style={{ flex: 1, backgroundColor: 'white', borderRadius:12 }} >
+                <View style={{ flex: 1, backgroundColor: 'white', borderRadius: 12 }} >
                     <ScrollView>
                         {
                             task.map((item, index) => {
@@ -348,7 +410,7 @@ const HistoryTransaksiAbsen = () => {
             {/* // */}
             <Modal isVisible={photo} >
                 <View style={{ flex: 0.5, backgroundColor: 'white', borderRadius: 12 }} >
-                    <View style={{ flex: 1, justifyContent: 'center',alignItems: 'center' }} >
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} >
                         {
                             img == 'null' ?
                                 <View style={styles.imgNull} >

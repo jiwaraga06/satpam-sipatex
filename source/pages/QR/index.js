@@ -108,6 +108,7 @@ const ScanQR = () => {
       { latitude: latitude, longitude: longitude },
     );
     console.log('Distance: ', distance);
+    console.log('Distance: ', radius);
     if (distance <= parRadius) {
       // setTimeout(() => {
         setisLoading(false);
@@ -165,13 +166,14 @@ const ScanQR = () => {
   }
 
   
+  const getDis = async () => {
+    const radius = await AsyncStorage.getItem('radius');
+    console.log('radius',radius);
+    const parRadius = JSON.parse(radius)
+    setvalidasiRadius(parRadius);
+  }
 
   useEffect(() => {
-    const getDis = async () => {
-      const radius = await AsyncStorage.getItem('radius');
-      const parRadius = JSON.parse(radius)
-      setvalidasiRadius(parRadius);
-    }
     getDis()
     getLokasi();
     // getRadius();

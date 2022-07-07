@@ -77,6 +77,11 @@ const apiHistoryTransaksiAbsen = (barcode, first_date, last_date) => {
     const url = `https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/absen?barcode=${barcode}&from=${first_date}&to=${last_date}`;
     return url;
 }
+const apiHistoryTransaksiAbsenAdmin = ( first_date, last_date) => {
+    // const url = `http://192.168.50.95/simr/public/api/v1/mobile-app/secsms/absen?barcode=${barcode}&from=${first_date}&to=${last_date}`;
+    const url = `https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/absen?from=${first_date}&to=${last_date}`;
+    return url;
+}
 const apiRadius = () => {
     // const url = 'http://192.168.50.95/simr/public/api/v1/mobile-app/secsms/radius';
     const url = 'https://satu.sipatex.co.id:2087/api/v1/mobile-app/secsms/radius';
@@ -100,4 +105,5 @@ export {
     apiTaskSubTaskByLokasi,
     apiHistoryTransaksiAbsen,
     apiRadius,
+    apiHistoryTransaksiAbsenAdmin
 }

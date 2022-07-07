@@ -91,7 +91,7 @@ const AddCheckPoint = ({ route }) => {
                     }
                     if (json.errors == null) {
                         setisLoading(false);
-                        setmessage(json.message);
+                        setmessage(json);
                         seterrKet(json.errors.keterangan);
                         seterrNamaLok(json.errors.nama_lokasi);
                     } else if (json.errors != null) {

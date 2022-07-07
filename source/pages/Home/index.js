@@ -47,6 +47,25 @@ const Home = () => {
         setrole(JSON.parse(roles));
     }
 
+    const saveRadius = async() => {
+        try {
+            const response = await fetch(apiRadius(), {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': apiToken()
+                },
+            });
+            const json =await response.json();
+            console.log('JSON RADIUS: ',json);
+            AsyncStorage.setItem('radius', JSON.stringify(json.radius));
+          
+        } catch (error) {
+            console.log('Error Radius: ', error);
+        }
+    }
+
     const logOut = async () => {
         const barcode = await AsyncStorage.getItem('barcode');
         setloadingLogout(true);
@@ -312,6 +331,7 @@ const Home = () => {
 
     useEffect(() => {
         getDataLocal();
+        saveRadius();
         const socket = io.connect(sockectVariable);
         socket.on('connect', () => {
             console.log('socket connect');
