@@ -23,6 +23,7 @@ const AbsenSatpam = ({ route }) => {
     const [listLocal, setlistLocal] = useState([]);
     const [dataLok, setdataLok] = useState([]);
     const [number, setnumber] = useState(-1);
+    const [sub_task_id, setsub_task_id] = useState(0);
     const [inActive, setinActive] = useState(0);
     const [task, settask] = useState([]);
     const [taskLokal, settaskLokal] = useState([]);
@@ -179,85 +180,41 @@ const AbsenSatpam = ({ route }) => {
         }
         // setisLoading(true);
         Geolocation.getCurrentPosition(async (position) => {
-            NetInfo.addEventListener(async (state) => {
-                if (state.isConnected) {
-                    const data = {
-                        "data": [{
-                            "tgl_absen": `${tahun}-${months}-${days} ${waktu}`,
-                            "barcode": barcode,
-                            "id_lokasi": id_lokasi,
-                            "lati": position.coords.latitude,
-                            "longi": position.coords.longitude,
-                            "id_sync": null,
-                            'tasks': task
-                        }]
-                    }
-                    console.log(data);
-                    try {
-                        const response = await fetch(apiTransaksiAbsen(), {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                                'Authorization': apiToken()
-                            },
-                            body: JSON.stringify(data)
-                        });
-                        const json = await response.json();
-                        console.log(json);
-                        if (json.errors) {
-                            setmessage(json.message);
-                            setisLoading(false)
-                        } else {
-                            setmessageSuccess(json.message);
-                            setisLoading(false)
-
-                        }
-                    } catch (error) {
-                        console.log('Error : ', error);
-                    }
+            const data = {
+                "data": [{
+                    "tgl_absen": `${tahun}-${months}-${days} ${waktu}`,
+                    "barcode": barcode,
+                    "id_lokasi": id_lokasi,
+                    "lati": position.coords.latitude,
+                    "longi": position.coords.longitude,
+                    "id_sync": null,
+                    'tasks': task
+                }]
+            }
+            console.log(data);
+            try {
+                const response = await fetch(apiTransaksiAbsen(), {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'Authorization': apiToken()
+                    },
+                    body: JSON.stringify(data)
+                });
+                const json = await response.json();
+                console.log(json);
+                if (json.errors) {
+                    setmessage(json.message);
+                    setisLoading(false)
                 } else {
-                    const data =
-                    {
-                        "tgl_absen": `${tahun}-${months}-${days} ${waktu}`,
-                        "barcode": barcode,
-                        "id_lokasi": id_lokasi,
-                        "lati": position.coords.latitude,
-                        "longi": position.coords.longitude,
-                        "id_sync": null,
-                        'tasks': task
-                    }
-                    // dataLok.push(data)
-                    setdataLok((rev) => [...rev, data])
-                    console.log('DataLOk: ', dataLok);
-                    AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
-                        .then(async (res) => {
-                            console.log('Res', res);
-                            if (res == undefined) {
-                                AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
-                                const DL = await AsyncStorage.getItem('lokalData')
-                                var par = JSON.parse(DL)
-                                console.log('INI DL: ', DL);
-                                if (par.length == 0) {
-                                    console.log('Ulangi');
-                                    Alert.alert('Information', 'Klik Sekali lagi untuk simpan ke lokal')
-                                } else {
-                                    console.log('sudah ada');
-                                    // Alert.alert('Information', 'Data Sudah di simpan')
-                                    setmessageSuccess('Berhasil Simpan Data Lokal')
-                                }
-                                // setisLoading(false)
-                                // setTimeout(async () => {
-                                //     AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
-                                //     const DL = await AsyncStorage.getItem('lokalData')
-                                //     console.log('INI DL Lokal: ', DL);
+                    setmessageSuccess(json.message);
+                    setisLoading(false)
 
-                                // }, 1000);
-                            }
-                        })
-                        .catch((err) => console.log(err))
                 }
-            })
+            } catch (error) {
+                console.log('Error : ', error);
+            }
 
             /////
         }, error => {
@@ -269,7 +226,55 @@ const AbsenSatpam = ({ route }) => {
         })
 
     }
+    const postTransaksiLokal = async () => {
+        Geolocation.getCurrentPosition(async (position) => {
+            const data =
+            {
+                "tgl_absen": `${tahun}-${months}-${days} ${waktu}`,
+                "barcode": barcode,
+                "id_lokasi": id_lokasi,
+                "lati": position.coords.latitude,
+                "longi": position.coords.longitude,
+                "id_sync": null,
+                'tasks': task
+            }
+            // dataLok.push(data)
+            setdataLok((rev) => [...rev, data])
+            console.log('DataLOk: ', dataLok);
+            AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                .then(async (res) => {
+                    console.log('Res', res);
+                    if (res == undefined) {
+                        AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                        const DL = await AsyncStorage.getItem('lokalData')
+                        var par = JSON.parse(DL)
+                        console.log('INI DL: ', DL);
+                        if (par.length == 0) {
+                            console.log('Ulangi');
+                            Alert.alert('Information', 'Klik Sekali lagi untuk simpan ke lokal')
+                        } else {
+                            console.log('sudah ada');
+                            // Alert.alert('Information', 'Data Sudah di simpan')
+                            setmessageSuccess('Berhasil Simpan Data Lokal')
+                        }
+                        // setisLoading(false)
+                        // setTimeout(async () => {
+                        //     AsyncStorage.setItem('lokalData', JSON.stringify(dataLok))
+                        //     const DL = await AsyncStorage.getItem('lokalData')
+                        //     console.log('INI DL Lokal: ', DL);
 
+                        // }, 1000);
+                    }
+                })
+                .catch((err) => console.log(err))
+        }, error => {
+            console.log('Error Get Lokasi: ', error);
+        }, {
+            accuracy: 1,
+            enableHighAccuracy: true,
+            distanceFilter: 1,
+        })
+    }
     useEffect(() => {
         // console.log(sub_task);
         NetInfo.addEventListener((state) => {
@@ -322,6 +327,7 @@ const AbsenSatpam = ({ route }) => {
                                     return <View key={index} style={styles.card} >
                                         <View style={{ margin: 8 }} >
                                             <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.sub_task}</Text>
+                                            {/* <Text style={{ fontSize: 17, fontWeight: '700' }} >{item.id}</Text> */}
                                         </View>
                                         <View style={styles.isActive(item.is_aktif)} >
                                             {
@@ -347,7 +353,7 @@ const AbsenSatpam = ({ route }) => {
                                         {
                                             item.is_aktif == 1 ?
                                                 <View style={{ margin: 8 }} >
-                                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); setsub_task_id(item.id); }} >
                                                         <Text style={styles.btnFont} >Isi Task</Text>
                                                     </Button>
                                                 </View>
@@ -389,7 +395,7 @@ const AbsenSatpam = ({ route }) => {
                                         {
                                             item.is_aktif == 1 ?
                                                 <View style={{ margin: 8 }} >
-                                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); }} >
+                                                    <Button full style={styles.btnIsi} onPress={() => { setnumber(index); setsub_task_id(item.id); }} >
                                                         <Text style={styles.btnFont} >Isi Task</Text>
                                                     </Button>
                                                 </View>
@@ -441,7 +447,7 @@ const AbsenSatpam = ({ route }) => {
                                         {
                                             text: 'Sudah',
                                             onPress: () => {
-                                                postTransaksi()
+                                                postTransaksiLokal()
                                             }
                                         },
                                     ])
@@ -517,8 +523,10 @@ const AbsenSatpam = ({ route }) => {
                                         let temp_state_lokal = [...taskLokal];
                                         let temp_element = { ...temp_state[number] };
                                         let temp_element_lokal = { ...temp_state_lokal[number] };
-                                        temp_element.sub_task_id = number + 1;
-                                        temp_element_lokal.sub_task_id = number + 1;
+                                        temp_element.id = number + 1;
+                                        temp_element_lokal.id = number + 1;
+                                        temp_element.sub_task_id = sub_task_id;
+                                        temp_element_lokal.sub_task_id = sub_task_id;
                                         temp_element.photo = photo;
                                         temp_element_lokal.photo = photo;
                                         temp_element.note = note;
@@ -532,7 +540,7 @@ const AbsenSatpam = ({ route }) => {
                                     } else {
                                         console.log('isi');
                                         const data = {
-                                            "sub_task_id": number + 1,
+                                            "sub_task_id": sub_task_id,
                                             "photo": "",
                                             "checklist": check,
                                             "note": note
