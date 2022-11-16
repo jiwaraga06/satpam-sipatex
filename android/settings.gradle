@@ -1,4 +1,10 @@
 rootProject.name = 'satpamsipatex'
+include ':sp-react-native-mqtt'
+project(':sp-react-native-mqtt').projectDir = new File(rootProject.projectDir, '../node_modules/sp-react-native-mqtt/android')
+include ':react-native-native-mqtt'
+project(':react-native-native-mqtt').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-native-mqtt/android')
+include ':react-native-native-mqtt'
+project(':react-native-native-mqtt').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-native-mqtt/android')
 include ':@react-native-community_netinfo'
 project(':@react-native-community_netinfo').projectDir = new File(rootProject.projectDir, '../node_modules/@react-native-community/netinfo/android')
 include ':react-native-image-base64'
@@ -18,4 +24,5 @@ include ':@mauron85_react-native-background-geolocation-common'
 project(':@mauron85_react-native-background-geolocation-common').projectDir = new File(rootProject.projectDir, '../node_modules/@mauron85/react-native-background-geolocation/android/common')
 include ':@mauron85_react-native-background-geolocation'
 project(':@mauron85_react-native-background-geolocation').projectDir = new File(rootProject.projectDir, '../node_modules/@mauron85/react-native-background-geolocation/android/lib')
+
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)

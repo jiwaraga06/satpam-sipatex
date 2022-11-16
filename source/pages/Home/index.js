@@ -1,6 +1,7 @@
+'use strict'
 import React, { useEffect, useState, useRef } from 'react'
 import { StyleSheet, View, TouchableOpacity, StatusBar, AsyncStorage, ScrollView, Alert, AppState, FlatList } from 'react-native'
-import { Container, Header, Left, Body, Title, Text, Button, Spinner } from 'native-base';
+import { Container, Header, Left, Body, Title, Text, Button, Spinner, Item, Input } from 'native-base';
 import { useNavigation } from '@react-navigation/native';
 import Modal from 'react-native-modal';
 import Geolocation from 'react-native-geolocation-service';
@@ -12,10 +13,18 @@ import { apiCheckPoint, apiLogout, apiPostHistoryLokasiSecurity, apiRadius, apiT
 import { deleteValueTableHistorySecurity, insertValueTableCheckpoint, insertValueTableHistorySecurity, insertValueTableSubTask, insertValueTableTask } from '../../SQLITE';
 import Netinfo, { useNetInfo } from '@react-native-community/netinfo';
 import { openDatabase } from 'react-native-sqlite-storage';
+import MarqueeText from 'react-native-marquee';
+import TextTicker from 'react-native-text-ticker'
+// import * as Mqtt from 'react-native-native-mqtt';
+import MQTT from 'sp-react-native-mqtt';
 var db = openDatabase({ name: 'SatpamDatabase.db' });
 
 var sockectVariable = 'https://api2.sipatex.co.id:2053';
 const io = require('socket.io-client');
+// const mqtt = require('mqtt');
+
+// const client = new Mqtt.Client('wss://mq01.sipatex.co.id:8848');
+
 
 const Home = () => {
     const navigation = useNavigation();
@@ -33,6 +42,9 @@ const Home = () => {
     const [checkpoint, setcheckpoint] = useState([]);
     const [task, settask] = useState([]);
     const [sub_task, setsub_task] = useState([]);
+    const [berita, setberita] = useState('');
+    const [valBerita, setvalBerita] = useState('');
+    const [clientID, setclientID] = useState('');
 
     const getProfile = async () => {
         const barc = await AsyncStorage.getItem('barcode');
@@ -45,9 +57,10 @@ const Home = () => {
         setgender(gen)
         console.log(roles);
         setrole(JSON.parse(roles));
+        setclientID(name + '_' + Math.floor(Math.random() * 100));
     }
 
-    const saveRadius = async() => {
+    const saveRadius = async () => {
         try {
             const response = await fetch(apiRadius(), {
                 method: 'GET',
@@ -57,10 +70,10 @@ const Home = () => {
                     'Authorization': apiToken()
                 },
             });
-            const json =await response.json();
-            console.log('JSON RADIUS: ',json);
+            const json = await response.json();
+            console.log('JSON RADIUS: ', json);
             AsyncStorage.setItem('radius', JSON.stringify(json.radius));
-          
+
         } catch (error) {
             console.log('Error Radius: ', error);
         }
@@ -163,7 +176,7 @@ const Home = () => {
                             });
                             const json = await response.json();
                             if (json == 'Holding') {
-                                console.log('post online di holding');
+                                // console.log('post online di holding');
                             } else if (json.errors) {
                                 console.log(json.errors);
 
@@ -253,48 +266,48 @@ const Home = () => {
                 }
             });
             const json = await response.json();
-            console.log('Json save local',json);
+            // console.log('Json save local', json);
             array.push(json)
-           if(array.length != 0){
-            array.map((data, index) => {
-                data.map((item, ix) => {
-                    // console.log(item);
-                    insertValueTableCheckpoint(
-                        item.id,
-                        item.nama_lokasi,
-                        item.lati,
-                        item.longi,
-                        item.keterangan,
-                        item.created_at,
-                        item.updated_at,
-                        item.user_creator
-                    );
-                    item.tasks.map((e, i) => {
-                        // console.log(e);
-                        insertValueTableTask(
-                            e.id,
-                            e.id_lokasi,
-                            e.task,
-                            e.user_creator,
-                            e.created_at,
-                            e.updated_at,
-                        )
-                        e.sub_task.map((sb, id) => {
-                            // console.log(sb);
-                            insertValueTableSubTask(
-                                sb.id,
-                                sb.id_task,
-                                sb.sub_task,
-                                sb.keterangan,
-                                sb.is_aktif,
-                                sb.created_at,
-                                sb.updated_at,
+            if (array.length != 0) {
+                array.map((data, index) => {
+                    data.map((item, ix) => {
+                        // console.log(item);
+                        insertValueTableCheckpoint(
+                            item.id,
+                            item.nama_lokasi,
+                            item.lati,
+                            item.longi,
+                            item.keterangan,
+                            item.created_at,
+                            item.updated_at,
+                            item.user_creator
+                        );
+                        item.tasks.map((e, i) => {
+                            // console.log(e);
+                            insertValueTableTask(
+                                e.id,
+                                e.id_lokasi,
+                                e.task,
+                                e.user_creator,
+                                e.created_at,
+                                e.updated_at,
                             )
+                            e.sub_task.map((sb, id) => {
+                                // console.log(sb);
+                                insertValueTableSubTask(
+                                    sb.id,
+                                    sb.id_task,
+                                    sb.sub_task,
+                                    sb.keterangan,
+                                    sb.is_aktif,
+                                    sb.created_at,
+                                    sb.updated_at,
+                                )
+                            })
                         })
                     })
                 })
-            })
-           }
+            }
         } catch (error) {
             console.log('Error get api data checkpoint : ', error);
         }
@@ -324,11 +337,98 @@ const Home = () => {
                     socket.on('disconnect', () => {
                         console.log('socket disconnect background');
                     })
+                    // MQTT
+                    // client.on(Mqtt.Event.Connect, (val) => {
+                    //     console.log('MQTT Connect');
+                    //     client.subscribe(['/2022/Majalaya/Security/News1'], [0]);
+                    // });
+                    // client.on(Mqtt.Event.Message, (topic, buff) => {
+                    //     console.log('Mqtt Message:', topic, buff.toString());
+                    // });
+                    // client.on(Mqtt.Event.Error, (e) => {
+                    //     console.log('ERROR', e);
+                    // })
                 }
             })
         }
     }
 
+    // MQTT
+
+    const kirimBerita = () => {
+        // var msg = Mqtt.Event.Message
+        // client.publish('/2022/Majalaya/Security/News1', msg, 0, false);
+
+        MQTT.createClient({
+            uri: 'mqtts://mq01.sipatex.co.id:8838',
+            // host: 'mq01.sipatex.co.id',
+            // port: 8838,
+            auth: true,
+            clientId: clientID,
+            user: 'it',
+            pass: 'it1234',
+            // protocol: 'mqtt',
+        }).then(function (client) {
+            client.connect();
+            client.on('closed', function () {
+                console.log('mqtt.event.closed');
+            });
+
+            client.on('error', function (msg) {
+                console.log('mqtt.event.error', msg);
+            });
+
+            client.on('message', function (msg) {
+                console.log('mqtt.event.message', msg);
+                setvalBerita(msg.data)
+            });
+
+            client.on('connect', function () {
+                console.log('connected');
+                client.subscribe('/2022/Majalaya/Security/News1', 0);
+                client.publish('/2022/Majalaya/Security/News1', '[' + clientID + ']' + ' ' + berita, 0, true);
+            });
+        }).catch(function (err) {
+            console.log("ERROR : ", err);
+        });
+        console.log(berita);
+        setberita('');
+    }
+    const koneksiMqtt = () => {
+        MQTT.createClient({
+            uri: 'mqtts://mq01.sipatex.co.id:8838',
+            // host: 'mq01.sipatex.co.id',
+            // port: 8838,
+            auth: true,
+            clientId: clientID,
+            user: 'it',
+            pass: 'it1234',
+            // protocol: 'mqtt',
+        }).then(function (client) {
+            client.connect();
+            client.on('closed', function () {
+                console.log('mqtt.event.closed');
+            });
+
+            client.on('error', function (msg) {
+                console.log('mqtt.event.error', msg);
+            });
+
+            client.on('message', function (msg) {
+                console.log('mqtt.event.message', msg);
+                setvalBerita(msg.data)
+
+            });
+
+            client.on('connect', function () {
+                console.log('connected');
+                client.subscribe('/2022/Majalaya/Security/News1', 0);
+                // client.publish('/2022/Majalaya/Security/News1', 'berita',0,false);
+            });
+        }).catch(function (err) {
+            console.log("ERROR : ", err);
+        });
+    }
     useEffect(() => {
         getDataLocal();
         saveRadius();
@@ -343,7 +443,31 @@ const Home = () => {
         socket.on('disconnect', () => {
             console.log('socket disconnect');
         })
-        
+        koneksiMqtt()
+        // client.connect({
+        //     clientId: 'SECURITY_123',
+        //     username: 'it',
+        //     password: 'it1234',
+        //     enableSsl: true,
+
+        //     // autoReconnect: true,
+        // }, stat => {
+        //     console.log('MQTT', stat);
+        // });
+        // ///2022/Majalaya/Security/News1
+        // client.on(Mqtt.Event.Connect, (val) => {
+        //     console.log('MQTT Connect');
+        //     client.subscribe(['/2022/Majalaya/Security/News1'], [0]);
+        //     // client.publish('/2022/Majalaya/Security/News1', "darihp", 0, false);
+        // });
+        // client.on(Mqtt.Event.Message, (topic, buff) => {
+        //     console.log('Mqtt Message:', topic, buff.toString());
+
+        // });
+        // client.on(Mqtt.Event.Error, (e) => {
+        //     console.log('ERROR', e);
+        // });
+
         intervalPost = BackgroundTimer.setInterval(() => {
             postOnline()
         }, 300000)
@@ -360,8 +484,8 @@ const Home = () => {
         // }
         Netinfo.addEventListener((state) => {
             if (state.isConnected) {
-                saveLocal()
-            } 
+                // saveLocal()
+            }
         })
     }, []);
 
@@ -380,7 +504,18 @@ const Home = () => {
                             <Text style={{ color: 'white', fontSize: 16 }} >{barcode}</Text>
                         </View>
                     </View>
-                    <View style={styles.signal(useNetInfo().isConnected)} />
+                    <View style={{ flexDirection: 'row', alignItems: "center" }}>
+                        <View>
+                            <TouchableOpacity onPress={logOut}>
+                                <MaterialCommunityIcons
+                                    name='logout'
+                                    color='white'
+                                    size={30}
+                                />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.signal(useNetInfo().isConnected)} />
+                    </View>
                 </View>
                 <ScrollView>
                     <View style={{ margin: 8 }} >
@@ -549,15 +684,80 @@ const Home = () => {
                                         </View>
                                     </View>
                     }
-
-
+                    {
+                        role.length == 0 ?
+                            <Spinner color='black' />
+                            : role.length == 1 ?
+                                role[0] == 'admin_scr' ?
+                                    <View>
+                                        <View style={{ margin: 8 }} >
+                                            <Text style={styles.font} >Berita</Text>
+                                            <View style={{ height: 5, backgroundColor: '#F0F0F0', borderRadius: 8, marginBottom: 8 }} />
+                                        </View>
+                                        <View >
+                                            <View style={{ margin: 8 }}>
+                                                <Item bordered={true} regular style={{ height: 45 }}>
+                                                    <Input
+                                                        value={berita}
+                                                        placeholder='Masukan Berita'
+                                                        onChangeText={(value) => {
+                                                            setberita(value)
+                                                        }}
+                                                    />
+                                                </Item>
+                                                <TouchableOpacity onPress={kirimBerita} >
+                                                    <View style={styles.btnBerita} >
+                                                        <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Kirim berita</Text>
+                                                    </View>
+                                                </TouchableOpacity>
+                                            </View>
+                                        </View>
+                                    </View> :
+                                    <View></View> : <View>
+                                    <View style={{ margin: 8 }} >
+                                        <Text style={styles.font} >Berita</Text>
+                                        <View style={{ height: 5, backgroundColor: '#F0F0F0', borderRadius: 8, marginBottom: 8 }} />
+                                    </View>
+                                    <View >
+                                        <View style={{ margin: 8 }}>
+                                            <Item bordered={true} regular style={{ height: 45 }}>
+                                                <Input
+                                                    value={berita}
+                                                    placeholder='Masukan Berita'
+                                                    onChangeText={(value) => {
+                                                        setberita(value)
+                                                    }}
+                                                />
+                                            </Item>
+                                            <TouchableOpacity onPress={kirimBerita} >
+                                                <View style={styles.btnBerita} >
+                                                    <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Kirim berita</Text>
+                                                </View>
+                                            </TouchableOpacity>
+                                        </View>
+                                    </View>
+                                </View>
+                    }
                 </ScrollView>
             </View>
-            <TouchableOpacity onPress={logOut} >
+            {/* <TouchableOpacity onPress={logOut} >
                 <View style={styles.logout} >
                     <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }} >Keluar Akun</Text>
                 </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
+            <View style={styles.marquee}>
+                <TextTicker
+                    style={{ fontSize: 20, color: 'white' }}
+                    duration={3000}
+                    loop
+                    repeatSpacer={50}
+                    animationType='scroll'
+                    marqueeOnMount={true}
+                // marqueeDelay={1000}
+                >
+                    {valBerita}
+                </TextTicker>
+            </View>
             {/* LOADING */}
             <Modal isVisible={loadingLogout} >
                 <View style={{ backgroundColor: 'white' }} >
@@ -571,6 +771,11 @@ const Home = () => {
 export default Home
 
 const styles = StyleSheet.create({
+    marquee: {
+        height: 50,
+        justifyContent: 'center',
+        backgroundColor: '#393E46',
+    },
     signal: (sinyal) => ({
         backgroundColor: sinyal == true ? '#2e7d32' : '#c62828',
         width: 25,
@@ -649,6 +854,14 @@ const styles = StyleSheet.create({
     logout: {
         margin: 8,
         backgroundColor: '#c62828',
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 45
+    },
+    btnBerita: {
+        margin: 8,
+        backgroundColor: '#F49D1A',
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',

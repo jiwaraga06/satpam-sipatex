@@ -4,6 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
+import com.tuanpm.RCTMqtt.RCTMqttPackage;
+import com.davesters.reactnative.mqtt.NativeMqttPackage;
+import com.davesters.reactnative.mqtt.NativeMqttPackage;
 import com.reactnativecommunity.netinfo.NetInfoPackage;
 import fr.snapp.imagebase64.RNImgToBase64Package;
 import com.ocetnik.timer.BackgroundTimerPackage;
@@ -35,6 +38,7 @@ public class MainApplication extends Application implements ReactApplication {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // packages.add(new MyReactNativePackage());
           // packages.add(new BackgroundGeolocationPackage());
+          // packages.add(new RCTMqttPackage());  
           return packages;
         }
 

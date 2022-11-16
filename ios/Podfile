@@ -24,6 +24,10 @@ target 'satpamsipatex' do
 
   pod 'react-native-netinfo', :path => '../node_modules/@react-native-community/netinfo'
 
+  pod 'react-native-native-mqtt', :path => '../node_modules/react-native-native-mqtt'
+
+  pod 'sp-react-native-mqtt', :path => '../node_modules/sp-react-native-mqtt'
+
   target 'satpamsipatexTests' do
     inherit! :complete
     # Pods for testing
